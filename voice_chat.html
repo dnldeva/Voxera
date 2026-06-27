@@ -137,7 +137,7 @@
 
     <div class="footer">
       <span>© 2026 D2NL Midea</span>
-      <span>Voxera v4.5</span>
+      <span>Voxera v4.6</span>
     </div>
   </div>
 </div>
@@ -200,6 +200,10 @@
       rec.continuous = true;
       rec.interimResults = true;
 
+      rec.onstart = () => {
+        console.log('Recording started');
+      };
+
       rec.onresult = (e) => {
         clearTimeout(silenceTimer);
         
@@ -210,13 +214,17 @@
         }
         show(text + tmp, true);
 
-        // Auto-stop after 2 seconds of silence
         silenceTimer = setTimeout(() => {
           stopRec();
         }, 2000);
       };
 
-      rec.onerror = (e) => { err('Error: ' + e.error); stopRec(); };
+      rec.onerror = (e) => { 
+        console.log('Error:', e.error);
+        err('Error: ' + e.error); 
+        stopRec(); 
+      };
+
       rec.start();
     } catch (e) {
       isRec = false;
@@ -226,10 +234,20 @@
   }
 
   function stopRec() {
+    console.log('Stopping recording...');
     clearTimeout(silenceTimer);
     isRec = false;
-    if (rec) rec.stop();
-    if (stream) stream.getTracks().forEach(t => t.stop());
+    
+    if (rec) {
+      rec.abort();
+      rec = null;
+    }
+    
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+    
     document.getElementById('recordBtn').classList.remove('listening');
     
     if (text.trim()) {
@@ -244,8 +262,19 @@
   }
 
   async function submitNow() {
+    console.log('GO button pressed');
+    
+    // STOP RECORDING FIRST
+    if (isRec) {
+      console.log('Recording still active, stopping...');
+      stopRec();
+    }
+
     const msg = text.trim();
-    if (!msg) { err('Record first'); return; }
+    if (!msg) { 
+      err('Record first'); 
+      return; 
+    }
 
     add('user', msg);
     text = '';
