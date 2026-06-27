@@ -134,15 +134,15 @@
           <div class="error-text" id="errorText"></div>
         </div>
         <div class="bottom-right">
-          <button class="btn-record" id="recordBtn" onclick="toggleRecord()">🎙️</button>
-          <button class="btn-go" id="goBtn" onclick="clickGO()">GO</button>
+          <button type="button" class="btn-record" id="recordBtn" onclick="clickRecord()">🎙️</button>
+          <button type="button" class="btn-go" id="goBtn" onclick="clickGO()">GO</button>
         </div>
       </div>
     </div>
 
     <div class="footer">
       <span>© 2026 D2NL Midea</span>
-      <span>Voxera v3.4</span>
+      <span>Voxera v3.5</span>
     </div>
   </div>
 </div>
@@ -158,7 +158,7 @@
   let mediaStream = null;
   let recognizer = null;
 
-  // LOGIN
+  // ===== LOGIN =====
   function handleLogin(e) {
     e.preventDefault();
     const u = document.getElementById('user').value.trim();
@@ -181,24 +181,31 @@
     document.getElementById('appPage').classList.remove('hidden');
   }
 
-  // RECORD - SYSTEM AUDIO ONLY
-  async function toggleRecord() {
-    if (!SpeechRec) {
-      showError('Use Chrome or Edge browser');
+  // ===== RECORD BUTTON =====
+  async function clickRecord() {
+    console.log('Record button clicked, isRecording:', isRecording);
+
+    if (isRecording) {
+      console.log('Already recording, stopping...');
+      stopRecord();
       return;
     }
 
-    if (isRecording) {
-      stopRecord();
+    if (!SpeechRec) {
+      showError('SpeechRecognition not available in this browser');
+      console.error('SpeechRecognition not available');
       return;
     }
 
     isRecording = true;
     recordedText = '';
     clearError();
-    document.getElementById('recordBtn').classList.add('listening');
-    updateStatus('📡 Capturing system audio... (click to stop)');
-    updateTranscript('', true);
+
+    const btn = document.getElementById('recordBtn');
+    btn.classList.add('listening');
+    
+    setStatus('📡 Requesting screen share...');
+    console.log('Requesting getDisplayMedia...');
 
     try {
       mediaStream = await navigator.mediaDevices.getDisplayMedia({
@@ -210,65 +217,115 @@
         }
       });
 
-      startSpeech();
-    } catch (err) {
+      console.log('✅ Got media stream');
+      setStatus('📡 Recording system audio... (click to stop)');
+      setTranscript('', true);
+      startSpeechRecognition();
+
+    } catch (error) {
+      console.error('Error getting display media:', error);
       isRecording = false;
-      document.getElementById('recordBtn').classList.remove('listening');
-      showError('Screen share cancelled or denied');
+      btn.classList.remove('listening');
+      
+      if (error.name === 'NotAllowedError') {
+        showError('Screen share was cancelled');
+      } else if (error.name === 'NotSupportedError') {
+        showError('Screen share not supported in this browser');
+      } else {
+        showError('Error: ' + error.message);
+      }
     }
   }
 
-  function startSpeech() {
+  function startSpeechRecognition() {
+    console.log('Starting speech recognition...');
+    
     recognizer = new SpeechRec();
     recognizer.lang = 'en-GB';
     recognizer.continuous = true;
     recognizer.interimResults = true;
 
-    recognizer.onresult = (e) => {
+    recognizer.onstart = () => {
+      console.log('Speech recognition started');
+    };
+
+    recognizer.onresult = (event) => {
+      console.log('onresult:', event);
       let interim = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const txt = e.results[i][0].transcript;
-        if (e.results[i].isFinal) {
-          recordedText += txt + ' ';
+      
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        console.log('Transcript:', transcript, 'isFinal:', event.results[i].isFinal);
+        
+        if (event.results[i].isFinal) {
+          recordedText += transcript + ' ';
         } else {
-          interim += txt;
+          interim += transcript;
         }
       }
-      updateTranscript(recordedText + interim, true);
+      
+      setTranscript(recordedText + interim, true);
     };
 
     recognizer.onend = () => {
+      console.log('Speech recognition ended');
       stopRecord();
     };
 
-    recognizer.onerror = (e) => {
+    recognizer.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      showError('Microphone error: ' + event.error);
       stopRecord();
     };
 
-    recognizer.start();
-  }
-
-  function stopRecord() {
-    isRecording = false;
-    if (recognizer) recognizer.stop();
-    if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-    
-    document.getElementById('recordBtn').classList.remove('listening');
-
-    if (recordedText.trim()) {
-      updateTranscript(recordedText.trim(), false);
-      updateStatus('Ready — press GO to send');
-    } else {
-      updateTranscript('', false);
-      updateStatus('No audio detected');
+    try {
+      recognizer.start();
+      console.log('Speech recognition started successfully');
+    } catch (error) {
+      console.error('Error starting recognition:', error);
+      showError('Could not start recording: ' + error.message);
+      stopRecord();
     }
   }
 
-  // GO BUTTON
+  function stopRecord() {
+    console.log('Stopping record, recordedText length:', recordedText.length);
+    
+    isRecording = false;
+    
+    if (recognizer) {
+      recognizer.stop();
+    }
+    
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => {
+        console.log('Stopping track:', track.kind);
+        track.stop();
+      });
+      mediaStream = null;
+    }
+
+    const btn = document.getElementById('recordBtn');
+    btn.classList.remove('listening');
+
+    if (recordedText.trim().length > 0) {
+      console.log('Got text:', recordedText.trim());
+      setTranscript(recordedText.trim(), false);
+      setStatus('✅ Input captured — press GO to send');
+    } else {
+      console.log('No text captured');
+      setTranscript('', false);
+      setStatus('No speech detected — try again');
+    }
+  }
+
+  // ===== GO BUTTON =====
   function clickGO() {
+    console.log('GO button clicked, recordedText:', recordedText);
+    
     const text = recordedText.trim();
     
-    if (!text) {
+    if (!text || text.length === 0) {
       showError('No input — press Record first');
       return;
     }
@@ -277,12 +334,14 @@
   }
 
   async function sendToAPI(text) {
+    console.log('Sending to API:', text);
+    
     addMsg('user', text);
     recordedText = '';
-    updateTranscript('', false);
+    setTranscript('', false);
     conversation.push({ role: 'user', content: text });
 
-    updateStatus('⏳ Waiting for response...');
+    setStatus('⏳ Waiting for response...');
     clearError();
     document.getElementById('goBtn').disabled = true;
 
@@ -300,6 +359,8 @@
         })
       });
 
+      console.log('API Response status:', res.status);
+
       if (!res.ok) {
         showError(`API error ${res.status}`);
         conversation.pop();
@@ -308,6 +369,7 @@
       }
 
       const data = await res.json();
+      console.log('API Response:', data);
 
       if (data.error) {
         showError('API Error: ' + data.error);
@@ -321,17 +383,18 @@
       conversation.push({ role: 'assistant', content: reply });
 
       saveToStorage();
-      updateStatus('Ready — press Record to continue');
+      setStatus('Ready — press Record to continue');
       document.getElementById('goBtn').disabled = false;
 
     } catch (err) {
+      console.error('Fetch error:', err);
       showError('Connection error: ' + err.message);
       conversation.pop();
       document.getElementById('goBtn').disabled = false;
     }
   }
 
-  // UI
+  // ===== UI HELPERS =====
   function addMsg(role, text) {
     const cont = document.getElementById('msgList');
     const div = document.createElement('div');
@@ -343,18 +406,19 @@
     div.scrollIntoView({ behavior: 'smooth' });
   }
 
-  function updateTranscript(text, rec) {
+  function setTranscript(text, rec) {
     const box = document.getElementById('transcriptBox');
     box.textContent = text || 'Audio transcript will appear here...';
     box.className = rec ? 'transcript-box recording' : 'transcript-box';
   }
 
-  function updateStatus(text) {
+  function setStatus(text) {
     document.getElementById('statusText').textContent = text;
   }
 
   function showError(text) {
     document.getElementById('errorText').textContent = text;
+    console.error('Error:', text);
   }
 
   function clearError() {
@@ -365,7 +429,7 @@
     window.location.href = 'user-transcripts.html';
   }
 
-  // STORAGE
+  // ===== STORAGE =====
   function saveToStorage() {
     const t = {
       timestamp: new Date().toISOString(),
@@ -377,8 +441,9 @@
     localStorage.setItem('transcripts', JSON.stringify(all));
   }
 
-  // INIT
+  // ===== INIT =====
   window.addEventListener('load', () => {
+    console.log('Page loaded');
     if (localStorage.getItem('currentUser')) {
       currentUser = localStorage.getItem('currentUser');
       document.getElementById('loginPage').classList.add('hidden');
