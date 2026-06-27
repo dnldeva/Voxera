@@ -36,7 +36,7 @@
   .dot { width: 8px; height: 8px; background: #4caf50; border-radius: 50%; }
   
   .toggle-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #f8f8f5; border-bottom: 1px solid #eee; }
-  .toggle-label { font-size: 11px; color: #777; }
+  .toggle-label { font-size: 11px; color: #777; font-weight: 600; }
   .transcripts-link { font-size: 10px; color: #EF9F27; text-decoration: underline; cursor: pointer; }
   
   .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; max-height: 350px; }
@@ -111,14 +111,14 @@
     </div>
 
     <div class="toggle-bar">
-      <span class="toggle-label">Microphone Mode</span>
+      <span class="toggle-label">📡 System Audio Mode</span>
       <span class="transcripts-link" onclick="goTranscripts()">📋 My Transcripts</span>
     </div>
 
     <div class="messages" id="msgList">
       <div class="message ai">
         <div class="avatar ai">D2N</div>
-        <div class="bubble">Welcome! Press Record to speak, then GO for an answer.</div>
+        <div class="bubble">Welcome! Press Record to capture system audio, then GO for an answer.</div>
       </div>
     </div>
 
@@ -126,7 +126,7 @@
 
     <div class="bottom">
       <div class="controls">
-        <button class="btn-record" id="recordBtn" onclick="toggleRecord()">🎤</button>
+        <button class="btn-record" id="recordBtn" onclick="toggleRecord()">🎙️</button>
         <button class="btn-go" id="goBtn" onclick="clickGO()">GO</button>
       </div>
       <div class="status" id="statusText">Ready — press Record to begin</div>
@@ -135,7 +135,7 @@
 
     <div class="footer">
       <span>© 2026 D2NL Midea</span>
-      <span>Voxera v3.1</span>
+      <span>Voxera v3.2</span>
     </div>
   </div>
 </div>
@@ -174,7 +174,7 @@
     document.getElementById('appPage').classList.remove('hidden');
   }
 
-  // RECORD
+  // RECORD - SYSTEM AUDIO ONLY
   async function toggleRecord() {
     if (!SpeechRec) {
       showError('Use Chrome or Edge browser');
@@ -190,16 +190,25 @@
     recordedText = '';
     clearError();
     document.getElementById('recordBtn').classList.add('listening');
-    updateStatus('🎤 Recording... (click to stop)');
+    updateStatus('📡 Capturing system audio... (click to stop)');
     updateTranscript('', true);
 
     try {
-      mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // SYSTEM AUDIO ONLY - getDisplayMedia() captures screen/speaker audio
+      mediaStream = await navigator.mediaDevices.getDisplayMedia({
+        video: false,
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false
+        }
+      });
+
       startSpeech();
     } catch (err) {
       isRecording = false;
       document.getElementById('recordBtn').classList.remove('listening');
-      showError('Microphone access denied');
+      showError('Screen share cancelled or denied');
     }
   }
 
@@ -272,8 +281,6 @@
     document.getElementById('goBtn').disabled = true;
 
     try {
-      console.log('Sending to API:', text);
-
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -287,8 +294,6 @@
         })
       });
 
-      console.log('API Response Status:', res.status);
-
       if (!res.ok) {
         showError(`API error ${res.status}`);
         conversation.pop();
@@ -297,7 +302,6 @@
       }
 
       const data = await res.json();
-      console.log('API Data:', data);
 
       if (data.error) {
         showError('API Error: ' + data.error);
@@ -315,7 +319,6 @@
       document.getElementById('goBtn').disabled = false;
 
     } catch (err) {
-      console.error('Fetch error:', err);
       showError('Connection error: ' + err.message);
       conversation.pop();
       document.getElementById('goBtn').disabled = false;
