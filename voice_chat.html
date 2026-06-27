@@ -12,22 +12,15 @@
   .logo { width: 60px; height: 60px; background: #94FF33; border-radius: 12px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: #1a1a1a; }
   h1 { font-size: 28px; color: #1a1a2e; margin-bottom: 8px; text-align: center; }
   p { text-align: center; color: #999; margin-bottom: 32px; font-size: 14px; }
-  
   .form-group { margin-bottom: 16px; }
   .form-group label { display: block; font-size: 12px; font-weight: 600; color: #777; margin-bottom: 8px; text-transform: uppercase; }
   .form-group input { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; }
   .form-group input:focus { outline: none; border-color: #EF9F27; }
-  
   .login-btn { width: 100%; padding: 12px; background: #1a1a2e; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; margin-top: 20px; }
   .login-btn:hover { background: #2a2a4e; }
-  .login-btn:active { transform: scale(0.98); }
-  
   .error { color: #c0392b; text-align: center; margin-top: 16px; font-size: 13px; }
-  
-  .app { display: none; }
+  .app { display: none; width: 650px; background: #fff; border-radius: 18px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); overflow: hidden; flex-direction: column; }
   .app.visible { display: flex; }
-  
-  .app { width: 650px; background: #fff; border-radius: 18px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); overflow: hidden; flex-direction: column; }
   .header { padding: 16px 24px; background: #1a1a2e; display: flex; align-items: center; gap: 12px; }
   .logo-mark { width: 36px; height: 36px; border-radius: 8px; background: #94FF33; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #1a1a1a; flex-shrink: 0; }
   .logo-text { display: flex; flex-direction: column; }
@@ -38,22 +31,20 @@
   .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4caf50; }
   .toggle-row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 8px 20px; background: #f8f8f5; border-bottom: 1px solid #eee; }
   .transcript-link { cursor: pointer; color: #EF9F27; text-decoration: underline; font-size: 11px; }
-  
   .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; max-height: 360px; }
   .msg { display: flex; gap: 12px; align-items: flex-start; }
   .avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; background: #94FF33; color: #1a1a1a; }
   .bubble { max-width: 80%; padding: 12px 16px; border-radius: 14px; font-size: 14px; line-height: 1.65; background: #FFF8EC; color: #5a3e00; }
-  
   .transcript-box { margin: 0 16px; min-height: 54px; background: #f8f8f5; border-radius: 10px; padding: 12px 16px; font-size: 14px; color: #777; border: 1.5px dashed #ddd; display: flex; align-items: center; }
   .transcript-box.active { background: #f0f0f8; border-color: #1a1a2e; color: #1a1a2e; }
-  
   .bottom { padding: 14px 20px 18px; border-top: 1px solid #eee; background: #fafafa; }
   .controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
   .go-btn { width: 78px; height: 78px; border-radius: 50%; border: none; background: #1a1a2e; color: #EF9F27; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 12px rgba(26,26,46,0.3); display: flex; align-items: center; justify-content: center; }
-  .go-btn:hover { background: #2a2a4e; transform: scale(1.05); }
+  .go-btn:hover { background: #2a2a4e; }
+  .go-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .interviewer-btn button { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #1a1a2e; background: #fff; cursor: pointer; font-weight: 600; font-size: 28px; }
   .interviewer-btn button:hover { background: #1a1a2e; color: #EF9F27; }
-  .interviewer-btn button.listening { background: #1a1a2e; color: #E24B4A; animation: pulse 1s infinite; }
+  .interviewer-btn button.listening { background: #E24B4A; color: #fff; animation: pulse 1s infinite; }
   @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(226,75,74,0.3)} 50%{box-shadow:0 0 0 12px rgba(226,75,74,0)} }
   .status { font-size: 13px; color: #999; text-align: center; margin-top: 10px; }
   .error-msg { font-size: 12px; color: #c0392b; text-align: center; margin-top: 4px; }
@@ -65,12 +56,12 @@
 <div class="login-container" id="login-screen">
   <div class="logo">D2N</div>
   <h1>Voxera</h1>
-  <p>AI-Powered Interview Assistant</p>
+  <p>AI Interview Assistant</p>
   
   <form onsubmit="handleLogin(event)">
     <div class="form-group">
       <label>Username</label>
-      <input type="text" id="username" placeholder="e.g., alice" required />
+      <input type="text" id="username" placeholder="e.g., alice" required autofocus />
     </div>
     <div class="form-group">
       <label>Password</label>
@@ -101,56 +92,48 @@
   <div class="messages" id="messages">
     <div class="msg">
       <div class="avatar">D2N</div>
-      <div class="bubble">Welcome to Voxera! Press <strong>Interviewer</strong> to record a question, then <strong>GO</strong> for an answer.</div>
+      <div class="bubble">Welcome! Press <strong>🎤 Record</strong> to speak a question, then <strong>GO</strong> for an AI answer.</div>
     </div>
   </div>
 
-  <div class="transcript-box" id="transcript-box">Audio transcript will appear here...</div>
+  <div class="transcript-box" id="transcript-box">Your question will appear here...</div>
 
   <div class="bottom">
     <div class="controls">
       <div class="interviewer-btn">
-        <button id="mic-btn" onclick="handleMic()" title="Record question">🎤</button>
+        <button id="mic-btn" onclick="toggleRecord()" title="Click to record">🎤</button>
       </div>
       <button class="go-btn" id="go-btn" onclick="submitQuestion()">GO</button>
     </div>
-    <div class="status" id="status">Ready — press Interviewer to begin</div>
+    <div class="status" id="status">Ready — click 🎤 to record</div>
     <div class="error-msg" id="error"></div>
   </div>
 
   <div class="footer">
     <span>© 2026 D2NL Midea</span>
-    <span>Voxera v2.1</span>
+    <span>Voxera v2.2</span>
   </div>
 </div>
 
 <script>
-  const VALID_USERS = {
-    'alice': 'password123',
-    'bob': 'securepass456',
-    'charlie': 'mypassword789'
-  };
+  const VALID_USERS = { 'alice': 'password123', 'bob': 'securepass456', 'charlie': 'mypassword789' };
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  
+  let recognition = null, isListening = false, capturedText = '', history = [];
 
   function handleLogin(event) {
     event.preventDefault();
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-
     if (VALID_USERS[username] && VALID_USERS[username] === password) {
       window.currentUsername = username;
       localStorage.setItem('currentUser', username);
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app').classList.add('visible');
     } else {
-      document.getElementById('login-error').textContent = 'Invalid username or password';
+      document.getElementById('login-error').textContent = 'Invalid credentials';
     }
   }
-
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let recognition = null;
-  let isListening = false;
-  let capturedText = '';
-  let history = [];
 
   function showError(msg) { document.getElementById('error').textContent = msg; }
   function clearError() { document.getElementById('error').textContent = ''; }
@@ -160,63 +143,67 @@
     const c = document.getElementById('messages');
     const d = document.createElement('div');
     d.className = 'msg';
-    d.innerHTML = `<div class="avatar">${role === 'ai' ? 'D2N' : 'YOU'}</div><div class="bubble"><strong>${role === 'ai' ? 'Voxera' : 'You'}:</strong> ${text}</div>`;
+    d.innerHTML = `<div class="avatar">${role === 'ai' ? 'D2N' : '👤'}</div><div class="bubble"><strong>${role === 'ai' ? 'Voxera' : 'You'}:</strong> ${text}</div>`;
     c.appendChild(d);
     d.scrollIntoView({ behavior: 'smooth' });
   }
 
-  async function handleMic() {
-    if (!SR) { showError('Please use Chrome or Edge'); return; }
+  function toggleRecord() {
+    if (!SR) { showError('Use Chrome or Edge browser'); return; }
     if (isListening) { recognition.stop(); return; }
+    
+    isListening = true;
+    capturedText = '';
+    clearError();
+    document.getElementById('mic-btn').classList.add('listening');
+    setStatus('🎤 Recording... (speak now)');
 
-    try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({ video: false, audio: { echoCancellation: false } });
-      isListening = true;
-      capturedText = '';
-      clearError();
-      document.getElementById('mic-btn').classList.add('listening');
-      setStatus('📡 Capturing system audio...');
+    recognition = new SR();
+    recognition.lang = 'en-GB';
+    recognition.continuous = true;
+    recognition.interimResults = true;
 
-      recognition = new SR();
-      recognition.lang = 'en-GB';
-      recognition.continuous = true;
-      recognition.interimResults = true;
+    recognition.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) capturedText += e.results[i][0].transcript + ' ';
+        else interim += e.results[i][0].transcript;
+      }
+      document.getElementById('transcript-box').textContent = capturedText + interim;
+      document.getElementById('transcript-box').classList.add('active');
+    };
 
-      recognition.onresult = (e) => {
-        let interim = '';
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          if (e.results[i].isFinal) capturedText += e.results[i][0].transcript + ' ';
-          else interim += e.results[i][0].transcript;
-        }
-        document.getElementById('transcript-box').textContent = capturedText + interim;
-      };
-
-      recognition.onend = () => {
-        isListening = false;
-        document.getElementById('mic-btn').classList.remove('listening');
-        stream.getTracks().forEach(t => t.stop());
-        if (capturedText.trim()) setStatus('Input captured — press GO');
-        else setStatus('No audio detected');
-      };
-
-      recognition.start();
-    } catch (e) {
+    recognition.onend = () => {
       isListening = false;
       document.getElementById('mic-btn').classList.remove('listening');
-      showError('Screen share cancelled');
-    }
+      if (capturedText.trim()) {
+        setStatus('Ready — press GO');
+      } else {
+        setStatus('No speech detected — try again');
+        document.getElementById('transcript-box').classList.remove('active');
+      }
+    };
+
+    recognition.onerror = (e) => {
+      isListening = false;
+      document.getElementById('mic-btn').classList.remove('listening');
+      showError('Microphone error: ' + e.error);
+    };
+
+    recognition.start();
   }
 
   async function submitQuestion() {
     const text = capturedText.trim();
-    if (!text) { showError('No input — press Interviewer first'); return; }
+    if (!text) { showError('No question recorded'); return; }
 
     addMsg('user', text);
     document.getElementById('transcript-box').textContent = '';
+    document.getElementById('transcript-box').classList.remove('active');
     capturedText = '';
     history.push({ role: 'user', content: text });
 
-    setStatus('Processing...');
+    setStatus('⏳ Thinking...');
     clearError();
 
     try {
@@ -226,16 +213,17 @@
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
           messages: [
-            { role: 'system', content: 'You are an expert interview coach. Provide concise, professional answers.' },
+            { role: 'system', content: 'You are an expert interview coach. Answer concisely in 2-3 sentences.' },
             ...history
           ],
-          max_tokens: 450
+          max_tokens: 300
         })
       });
 
       const data = await res.json();
-      if (data.error) showError('API error');
-      else {
+      if (data.error) {
+        showError('API error: ' + data.error);
+      } else {
         const reply = data.choices[0].message.content;
         addMsg('ai', reply);
         history.push({ role: 'assistant', content: reply });
@@ -245,7 +233,7 @@
         all.push(transcript);
         localStorage.setItem('transcripts', JSON.stringify(all));
 
-        setStatus('Ready — press Interviewer to continue');
+        setStatus('Ready — click 🎤 to continue');
       }
     } catch (e) {
       showError('Connection error');
