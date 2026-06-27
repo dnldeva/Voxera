@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Voxera — D2NL Midea</title>
+<title>Voxera  D2NL Midea</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ec; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 24px 0; }
@@ -84,38 +84,38 @@
   .footer { padding: 10px 24px; background: #1a1a2e; display: flex; align-items: center; justify-content: space-between; }
   .footer-left { font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 0.5px; }
   .footer-right { font-size: 11px; color: #EF9F27; letter-spacing: 0.5px; }
+  .transcript-link { cursor: pointer; color: #EF9F27; text-decoration: underline; }
 </style>
 </head>
 <body>
  
 <script>
-  // Multi-user password authentication
+  // STRICT LOGIN VALIDATION
   const validUsers = {
     'alice': 'password123',
     'bob': 'securepass456',
     'charlie': 'mypassword789',
-    'user1': 'test123',
-    'admin': 'adminpass999'
+    'user1': 'test123'
   };
   
-  const username = prompt('👤 Enter username:');
-  const password = prompt('🔐 Enter password:');
+  const username = prompt(' Enter username:');
+  const password = prompt(' Enter password:');
   
   if (!validUsers[username] || validUsers[username] !== password) {
-    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><div style="text-align:center;"><h1>🔒 Access Denied</h1><p>Invalid username or password.</p><p>Contact admin for credentials.</p></div></div>';
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><div style="text-align:center;"><h1> Access Denied</h1><p>Invalid username or password.</p><p>Contact admin for credentials.</p></div></div>';
     throw new Error('Unauthorized');
   }
 
   window.currentUsername = username;
+  localStorage.setItem('currentUser', username);
 </script>
 
 <div class="app">
-
   <div class="header">
     <div class="logo-mark">D2N</div>
     <div class="logo-text">
       <span class="logo-name">Voxera</span>
-      <span class="logo-sub">D2NL Midea · Intelligence Suite</span>
+      <span class="logo-sub">D2NL Midea  Intelligence Suite</span>
     </div>
     <div class="header-right">
       <span class="plan-badge">Pro Plan</span>
@@ -128,13 +128,7 @@
       <input type="checkbox" id="highlight-toggle" checked />
       <span class="toggle-slider"></span>
     </label>
-  </div>
-  <div class="toggle-row">
-    <span class="toggle-label">System audio (vs Microphone)</span>
-    <label class="toggle-wrap">
-      <input type="checkbox" id="audio-source-toggle" />
-      <span class="toggle-slider"></span>
-    </label>
+    <span style="margin-left: auto; font-size: 11px; color: #EF9F27; cursor: pointer; text-decoration: underline;" onclick="window.location.href='user-transcripts.html'"> My Transcripts</span>
   </div>
   <div class="zoom-popup" id="zoom-popup"></div>
   <div class="messages" id="messages">
@@ -142,7 +136,7 @@
       <div class="avatar ai-av">D2N</div>
       <div class="bubble">
         <div class="label">Voxera Assistant</div>
-        Welcome Mani. Endur interview context fully loaded — JVS, ab_tran, simulation, TPM, explorer, SQL tuning, settlements, daily challenges and your full resume. Press <strong>Interviewer</strong> to capture a question, then <strong>GO</strong> for an instant answer.
+        Welcome! Interview context fully loaded. Press <strong>Interviewer</strong> to capture a question, then <strong>GO</strong> for an instant answer.
       </div>
     </div>
   </div>
@@ -169,79 +163,26 @@
         </button>
       </div>
     </div>
-    <div class="status" id="status">System ready — press Interviewer to begin</div>
+    <div class="status" id="status">System ready  press Interviewer to begin (Stereo mode enabled)</div>
     <div class="error" id="error"></div>
   </div>
   <div class="footer">
-    <span class="footer-left">© 2026 D2NL Midea Technologies</span>
-    <span class="footer-right">Voxera v2.1 · Enterprise</span>
+    <span class="footer-left"> 2026 D2NL Midea Technologies</span>
+    <span class="footer-right">Voxera v2.1  Enterprise</span>
   </div>
 </div>
+
 <script>
   const API_URL = '/api/chat';
-  const MODEL   = 'llama-3.3-70b-versatile';
+  const MODEL = 'llama-3.3-70b-versatile';
   const WORD_DELAY = 520;
 
-  const SYSTEM_PROMPT = `You are an expert Endur ETRM interview coach helping the candidate answer interview questions in real time during a live job interview. Answer AS Mani speaking in first person — confident, specific, referencing real experience.
-
-CANDIDATE: Mani R — Senior Endur Developer | 10 years IT | 9+ years OpenLink Endur (v12-v25)
-CURRENT: Lead Endur Developer, Accenture (ExxonMobil) — Gas & Power Trading ETRM, 2022–Present
-PREVIOUS: Endur Developer, Chevron — two full programmes (Implementation 2018-2020, Enhancement 2020-2022)
-EARLIER: Software Developer, IT Services Company, 2014–2018 (Java, SQL, PL/SQL)
-
-KEY SKILLS: OpenLink Endur v12-v25, OpenJVS/JVS Scripting, Deal Booking, Trade Lifecycle, Risk & P&L, Endur Upgrades, Notification Manager, Back-Office Settlements, Simulation Module, Gas & Power Trading, MtM Valuation, Oracle/PL/SQL, Java, Python, Unix, Agile, JIRA, REST/XML APIs
-
-KEY ACHIEVEMENTS:
-- Reduced EOD settlement processing by 40% at ExxonMobil via JVS optimisation and Oracle query tuning
-- Led Endur v20-to-v25 upgrade at ExxonMobil — zero critical go-live incidents
-- Delivered two full-cycle Endur programmes at Chevron on time and within budget
-- Built reusable JVS scripting framework at Chevron — reduced script development time by 30%
-- Mentored 3 junior developers to independence within 6 months
-
-ENDUR TECHNICAL KNOWLEDGE:
-
-JVS/OpenJVS: JVS is Endur's Java-based proprietary scripting. OpenJVS is the modern API. Key classes: Table, DBaseTable, Transactions. Script types: Ops Service, Notification, Report, Interface, Pre/Post-process. Performance: always destroy tables, use bulk DB operations, avoid row-by-row JVS loops.
-
-ENDUR TABLES: ab_tran (core transaction table — tran_num, ins_num, tran_status, trade_date, position, price, external_lentity), deal_leg (deal legs), ins_parameter (instrument config), tran_leg (quantities/prices per period), party (counterparties), idx_def (curve definitions), idx_historical_price (market data), settlement_base (settlements), ab_tran_info (custom fields), USER_CONST_REPOSITORY (config store).
-
-SQL TUNING: Filter ab_tran on tran_status+ins_type+trade_date always. Use EXPLAIN PLAN and TKPROF. Partition pruning by trade_date. Oracle hints: INDEX, PARALLEL. Materialized views for daily P&L. Bulk collect/FORALL in PL/SQL. Avoid SELECT * on large tables.
-
-SIMULATION/TPM: TPM = Transaction & Position Manager. Simulation = what-if scenario P&L modelling. Sim types: Current, EOD, User, Hypothesis. Tables: sim_def, sim_result_tran, sim_pnl_by_leg. APM = Accounting & Position Manager for GL postings. Common issues: stale sim results, pricing model mismatch.
-
-ENDUR EXPLORER: Deal Explorer (deal blotter/search), Transaction Manager, Portfolio Manager, Query Manager (custom SQL reports), Report Builder (formatted output). Built daily trader P&L packs, VaR summaries, regulatory reports using Query Manager.
-
-DAILY CHALLENGES: Deal booking failures (ab_tran errors, missing ref data), settlement mismatches, interface failures (XML/REST feeds), EOD batch failures (position reset, curve population, sim timeouts), market data issues (missing curves, stale prices), performance degradation during peak hours, Notification Manager failures, user access/security issues. Reduced incident resolution from 4 hours to 1.5 hours at Chevron.
-
-TRADE LIFECYCLE: Deal Capture → Validation (pre-process JVS) → Confirmed (tran_status=3) → Scheduling/Nominations → MtM → EOD → Settlement → Back Office (APM/GL) → Reporting.
-
-SETTLEMENTS: Invoice creation → Netting → Payment confirmation → Treasury integration. Built full STP settlement workflows at Chevron. Endur Notification Manager configured for workflow events, settlement alerts, limit breach notifications.
-
-UPGRADES: Impact analysis → dev upgrade → regression testing → JVS code remediation → UAT → go-live. Led v20-to-v25 at ExxonMobil — full regression pack, 98% test coverage, zero critical incidents.
-
-ENDUR GLOSSARY (interpret mispronounced terms using this list):
-OpenLink, Endur, OpenJVS, JVS, ETRM, ab_tran, deal_leg, ins_parameter, tran_status, tran_num, ins_num,
-Deal Manager, Query Manager, Report Builder, Notification Manager, Limits Module, Simulation Module,
-TPM, APM, MtM, PnL, VaR, EOD, STP, MTM, ETL, FIX Protocol,
-Gas, Power, Physical, Financial, Scheduling, Nominations, Counterparty, Netting, Tolling,
-Index Curve, Market Data, Price Formula, Settlement, Invoice, Payment Confirmation,
-ExxonMobil, Chevron, Accenture, Oracle, PL/SQL, EXPLAIN PLAN, TKPROF, Bulk Collect, FORALL,
-v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22, v23, v24, v25,
-sim_def, sim_result_tran, sim_pnl_by_leg, idx_def, idx_historical_price, settlement_base, party, header,
-Agile, JIRA, Confluence, Git, Unix, Shell, Python, Java, XML, REST, SDLC
-
-INSTRUCTIONS:
-- Answer in first person AS MANI — "At ExxonMobil I...", "During the Chevron implementation..."
-- Give specific, confident, interview-ready answers — 3-5 sentences max
-- Always reference real experience from resume where relevant
-- If a term sounds mispronounced or garbled, interpret using the glossary and answer correctly
-- Be direct and professional — this is a live interview`;
+  const SYSTEM_PROMPT = `You are an expert interview coach. Provide concise, professional answers to interview questions.`;
 
   let recognition = null, isListening = false;
   let currentMode = null, capturedText = '', history = [];
   let highlightTimer = null;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-  startAutoSave();
 
   function isHighlightOn() { return document.getElementById('highlight-toggle').checked; }
   function showError(m) { document.getElementById('error').textContent = m; }
@@ -258,7 +199,7 @@ INSTRUCTIONS:
     const el = document.getElementById('mode-indicator');
     if (!mode) { el.className = 'mode-indicator'; el.textContent = ''; return; }
     el.className = 'mode-indicator ' + mode;
-    el.textContent = mode === 'interviewer' ? '⏺ Capturing audio input...' : '⏺ Recording response...';
+    el.textContent = mode === 'interviewer' ? ' Capturing system audio...' : ' Recording response...';
   }
 
   function hideZoomPopup() {
@@ -343,37 +284,16 @@ INSTRUCTIONS:
     }, WORD_DELAY);
   }
 
-  // Auto-save conversation every 10 minutes
-  let autoSaveInterval = null;
-
-  function startAutoSave() {
-    if (autoSaveInterval) clearInterval(autoSaveInterval);
-    autoSaveInterval = setInterval(saveConversation, 600000); // 10 minutes
-  }
-
-  async function saveConversation() {
+  function saveToLocalStorage() {
     if (history.length === 0) return;
-    
-    try {
-      const conversationData = {
-        timestamp: new Date().toISOString(),
-        username: window.currentUsername,
-        messages: history,
-        audioMode: document.getElementById('audio-source-toggle').checked ? 'system-audio' : 'microphone'
-      };
-      
-      const response = await fetch('/api/save-conversation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(conversationData)
-      });
-      
-      if (response.ok) {
-        console.log('✅ Conversation auto-saved');
-      }
-    } catch (error) {
-      console.error('Save error:', error);
-    }
+    const transcript = {
+      timestamp: new Date().toISOString(),
+      username: window.currentUsername,
+      messages: history
+    };
+    const transcripts = JSON.parse(localStorage.getItem('transcripts') || '[]');
+    transcripts.push(transcript);
+    localStorage.setItem('transcripts', JSON.stringify(transcripts));
   }
 
   function resetMicButtons() {
@@ -382,49 +302,76 @@ INSTRUCTIONS:
     showModeIndicator(null);
   }
 
+  async function captureSystemAudio(mode) {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: false,
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+      });
+
+      currentMode = mode;
+      capturedText = '';
+      clearError();
+
+      recognition = new SR();
+      recognition.lang = 'en-GB';
+      recognition.interimResults = true;
+      recognition.continuous = true;
+
+      recognition.onstart = () => {
+        isListening = true;
+        document.getElementById(mode === 'interviewer' ? 'interviewer-mic' : 'candidate-mic').className = 'listening';
+        showModeIndicator(mode);
+        setTranscript('', 'recording');
+        setStatus(' Capturing system audio  press again to stop');
+      };
+
+      recognition.onresult = (e) => {
+        let interim = '', finalBit = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          if (e.results[i].isFinal) finalBit += e.results[i][0].transcript;
+          else interim += e.results[i][0].transcript;
+        }
+        if (finalBit) capturedText += finalBit;
+        setTranscript(capturedText + interim, 'recording');
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        resetMicButtons();
+        stream.getTracks().forEach(track => track.stop());
+        const text = capturedText.trim();
+        if (text) {
+          setTranscript(text, mode === 'interviewer' ? 'active' : '');
+          if (mode === 'interviewer') { setStatus('Input captured  press GO for Voxera insight'); }
+          else { addMsg('candidate', text); capturedText = ''; setTranscript('', ''); setStatus('Response noted'); }
+        } else { setTranscript('', ''); setStatus('No audio detected'); }
+      };
+
+      recognition.onerror = (e) => {
+        isListening = false;
+        resetMicButtons();
+        stream.getTracks().forEach(track => track.stop());
+        setTranscript('', '');
+        showError('System audio access error: ' + e.error);
+      };
+
+      recognition.start();
+    } catch (error) {
+      showError('Screen share cancelled or unavailable');
+    }
+  }
+
   function toggleMic(mode) {
     if (!SR) { showError('Please use Chrome or Edge browser'); return; }
     if (isListening) { recognition.stop(); return; }
-    currentMode = mode; capturedText = ''; clearError();
-    recognition = new SR();
-    recognition.lang = 'en-GB'; recognition.interimResults = true; recognition.continuous = true;
-    recognition.onstart = () => {
-      isListening = true;
-      document.getElementById(mode === 'interviewer' ? 'interviewer-mic' : 'candidate-mic').className = 'listening';
-      showModeIndicator(mode); setTranscript('', 'recording');
-      setStatus(mode === 'interviewer' ? 'Capturing input — press Interviewer again to stop' : 'Recording your voice — press Respond again to stop');
-    };
-    recognition.onresult = (e) => {
-      let interim = '', finalBit = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) finalBit += e.results[i][0].transcript;
-        else interim += e.results[i][0].transcript;
-      }
-      if (finalBit) capturedText += finalBit;
-      setTranscript(capturedText + interim, 'recording');
-    };
-    recognition.onend = () => {
-      isListening = false; resetMicButtons();
-      const text = capturedText.trim();
-      if (text) {
-        setTranscript(text, mode === 'interviewer' ? 'active' : '');
-        if (mode === 'interviewer') { setStatus('Input captured — press GO for Voxera insight'); }
-        else { addMsg('candidate', text); capturedText = ''; setTranscript('', ''); setStatus('Response noted — press Interviewer for next input'); }
-      } else { setTranscript('', ''); setStatus('No audio detected — please try again'); }
-    };
-    recognition.onerror = (e) => {
-      isListening = false; resetMicButtons(); setTranscript('', '');
-      if (e.error === 'not-allowed') showError('Microphone access required — allow in Chrome settings');
-      else if (e.error === 'no-speech') setStatus('No audio detected — please try again');
-      else showError('Audio error: ' + e.error);
-    };
-    recognition.start();
+    captureSystemAudio(mode);
   }
 
   async function submitQuestion() {
     if (isListening) { recognition.stop(); await new Promise(r => setTimeout(r, 500)); }
     const text = capturedText.trim();
-    if (!text) { showError('No input captured yet — press Interviewer first'); return; }
+    if (!text) { showError('No input captured  press Interviewer first'); return; }
     if (highlightTimer) { clearInterval(highlightTimer); hideZoomPopup(); }
     addMsg('interviewer', text);
     setTranscript('', ''); capturedText = '';
@@ -437,16 +384,17 @@ INSTRUCTIONS:
         body: JSON.stringify({ model: MODEL, messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history], max_tokens: 450 })
       });
       const data = await res.json();
-      if (data.error) { removeTyping(); showError('Service error — please try again'); history.pop(); }
+      if (data.error) { removeTyping(); showError('Service error'); history.pop(); }
       else {
         const reply = data.choices[0].message.content;
         history.push({ role: 'assistant', content: reply });
         removeTyping();
         const bubble = addMsg('ai', reply);
-        clearError(); setStatus('System ready — press Interviewer to continue');
+        clearError(); setStatus('System ready  press Interviewer to continue');
+        saveToLocalStorage();
         if (isHighlightOn()) setTimeout(() => startWordHighlight(bubble, reply), 400);
       }
-    } catch(e) { removeTyping(); showError('Connection error — check your network'); history.pop(); }
+    } catch(e) { removeTyping(); showError('Connection error'); history.pop(); }
   }
 </script>
 </body>
