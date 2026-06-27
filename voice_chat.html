@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Voxera  Interview Assistant</title>
+<title>Voxera — Interview Assistant</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ec; }
@@ -135,7 +135,7 @@
           <span class="toggle-slider"></span>
         </label>
       </div>
-      <span class="transcript-link" onclick="window.location.href='user-transcripts.html'"> My Transcripts</span>
+      <span class="transcript-link" onclick="window.location.href='user-transcripts.html'">📋 My Transcripts</span>
     </div>
 
     <div class="messages" id="messagesList">
@@ -154,23 +154,23 @@
       <div class="mode-indicator" id="modeIndicator"></div>
       <div class="controls-row">
         <div class="candidate-btn">
-          <button id="candidateMicBtn" onclick="RECORDING.toggleMic('candidate')" title="Record your response"></button>
+          <button id="candidateMicBtn" onclick="RECORDING.toggleMic('candidate')" title="Record your response">🎤</button>
           <span>Respond</span>
         </div>
         <div class="right-controls">
           <div class="interviewer-btn">
-            <button id="interviewerMicBtn" onclick="RECORDING.toggleMic('interviewer')" title="Record interviewer question"></button>
+            <button id="interviewerMicBtn" onclick="RECORDING.toggleMic('interviewer')" title="Record interviewer question">🎙️</button>
             <span>Interviewer</span>
           </div>
           <button class="go-btn" id="goBtn" onclick="API.submitQuestion()">GO</button>
         </div>
       </div>
-      <div class="status" id="status">Ready  press Interviewer to begin</div>
+      <div class="status" id="status">Ready — press Interviewer to begin</div>
       <div class="error-msg" id="errorMsg"></div>
     </div>
 
     <div class="footer">
-      <span> 2026 D2NL Midea</span>
+      <span>© 2026 D2NL Midea</span>
       <span>Voxera v2.3</span>
     </div>
   </div>
@@ -276,7 +276,7 @@
       document.getElementById(btnId).classList.add('listening');
       UI.setModeIndicator(mode);
       UI.setTranscript('', 'recording');
-      UI.setStatus(mode === 'interviewer' ? ' Recording system audio...' : ' Recording...');
+      UI.setStatus(mode === 'interviewer' ? '📡 Recording system audio...' : '⏺ Recording...');
 
       this.recognition = new this.SR();
       this.recognition.lang = 'en-GB';
@@ -319,10 +319,10 @@
 
       if (this.capturedText.trim()) {
         UI.setTranscript(this.capturedText.trim(), this.currentMode);
-        UI.setStatus('Input captured  press GO');
+        UI.setStatus('Input captured — press GO');
       } else {
         UI.setTranscript('', '');
-        UI.setStatus('No speech detected  try again');
+        UI.setStatus('No speech detected — try again');
       }
     },
 
@@ -351,7 +351,7 @@
     async submitQuestion() {
       const text = RECORDING.getText();
       if (!text) {
-        UI.showError('No input captured  press Interviewer first');
+        UI.showError('No input captured — press Interviewer first');
         return;
       }
 
@@ -359,7 +359,7 @@
       RECORDING.clear();
       this.history.push({ role: 'user', content: text });
 
-      UI.setStatus(' Thinking...');
+      UI.setStatus('⏳ Thinking...');
       UI.clearError();
 
       try {
@@ -388,7 +388,7 @@
         this.history.push({ role: 'assistant', content: reply });
 
         STORAGE.saveTranscript(this.history);
-        UI.setStatus('Ready  press Interviewer to continue');
+        UI.setStatus('Ready — press Interviewer to continue');
       } catch (error) {
         UI.showError('Connection error: ' + error.message);
       }
@@ -435,7 +435,7 @@
     setModeIndicator(mode) {
       const indicator = document.getElementById('modeIndicator');
       indicator.style.display = 'block';
-      indicator.textContent = mode === 'interviewer' ? ' System audio mode' : ' Microphone mode';
+      indicator.textContent = mode === 'interviewer' ? '📡 System audio mode' : '⏺ Microphone mode';
     },
 
     clearModeIndicator() {
