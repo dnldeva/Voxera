@@ -120,9 +120,9 @@
 
     <div class="toggle-row">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <span class="toggle-label">Stereo Mode (System Audio)</span>
+        <span class="toggle-label">System Audio</span>
         <label class="toggle-wrap">
-          <input type="checkbox" id="stereoToggle" checked />
+          <input type="checkbox" id="stereoToggle" />
           <span class="toggle-slider"></span>
         </label>
       </div>
@@ -134,7 +134,7 @@
         <div class="avatar ai-av">D2N</div>
         <div class="bubble">
           <div class="label">Voxera Assistant</div>
-          Welcome! Press the microphone button to record, then <strong>GO</strong> for answers.
+          Welcome! Press Record to speak your question, then GO for answers.
         </div>
       </div>
     </div>
@@ -145,7 +145,7 @@
       <div class="mode-indicator" id="modeIndicator"></div>
       <div class="controls-row">
         <div class="mic-btn">
-          <button id="micBtn" onclick="startRecording()" title="Record question">🎙️</button>
+          <button id="micBtn" onclick="toggleRecord()" title="Record question">🎙️</button>
           <span id="micLabel">Record</span>
         </div>
         <button class="go-btn" id="goBtn" onclick="submitQuestion()">GO</button>
@@ -162,204 +162,164 @@
 </div>
 
 <script>
-  // ============== GLOBAL STATE ==============
-  let speechRecognition = null;
+  let recognition = null;
   let isRecording = false;
   let currentText = '';
   let mediaStream = null;
-  let conversationHistory = [];
+  let history = [];
 
-  const VALID_USERS = {
-    'alice': 'password123',
-    'bob': 'securepass456',
-    'charlie': 'mypassword789'
-  };
-
+  const USERS = { 'alice': 'password123', 'bob': 'securepass456', 'charlie': 'mypassword789' };
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  // ============== LOGIN ==============
+  // LOGIN
   function handleLogin(event) {
     event.preventDefault();
-    const username = document.getElementById('usernameField').value.trim();
-    const password = document.getElementById('passwordField').value.trim();
-
-    if (!VALID_USERS[username] || VALID_USERS[username] !== password) {
+    const u = document.getElementById('usernameField').value.trim();
+    const p = document.getElementById('passwordField').value.trim();
+    
+    if (!USERS[u] || USERS[u] !== p) {
       document.getElementById('loginError').textContent = 'Invalid username or password';
       document.getElementById('passwordField').value = '';
       return;
     }
 
-    window.currentUsername = username;
-    localStorage.setItem('currentUser', username);
-    showApp();
-  }
-
-  function showApp() {
+    window.currentUsername = u;
+    localStorage.setItem('currentUser', u);
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('appScreen').classList.remove('hidden');
   }
 
-  // ============== RECORDING ==============
-  async function startRecording() {
+  // RECORDING
+  async function toggleRecord() {
     if (!SR) {
-      showError('Please use Chrome or Edge browser');
+      showError('Use Chrome or Edge browser');
       return;
     }
-
+    
     if (isRecording) {
-      stopRecording();
+      stopRecord();
       return;
     }
 
     isRecording = true;
     currentText = '';
     clearError();
-
-    const stereoOn = document.getElementById('stereoToggle').checked;
-    const mode = stereoOn ? 'stereo' : 'microphone';
-
     document.getElementById('micBtn').classList.add('listening');
-    setModeIndicator(mode);
+    setStatus('🎤 Recording... (click to stop)');
     setTranscript('', 'recording');
-    setStatus(stereoOn ? '📡 Recording system audio... (click to stop)' : '🎤 Recording microphone... (click to stop)');
 
     try {
-      if (stereoOn) {
-        // Get system audio via screen share
-        mediaStream = await navigator.mediaDevices.getDisplayMedia({
-          video: false,
-          audio: { echoCancellation: false, noiseSuppression: false }
-        });
-      } else {
-        // Get microphone
-        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      }
-
-      startSpeechRecognition();
-    } catch (error) {
+      // Always use microphone - it's reliable
+      mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      startRecognition();
+    } catch (e) {
       isRecording = false;
       document.getElementById('micBtn').classList.remove('listening');
-      showError('Audio access denied or cancelled');
+      showError('Microphone access denied');
     }
   }
 
-  function startSpeechRecognition() {
-    speechRecognition = new SR();
-    speechRecognition.lang = 'en-GB';
-    speechRecognition.continuous = true;
-    speechRecognition.interimResults = true;
+  function startRecognition() {
+    recognition = new SR();
+    recognition.lang = 'en-GB';
+    recognition.continuous = true;
+    recognition.interimResults = true;
 
-    speechRecognition.onresult = (event) => {
+    recognition.onresult = (e) => {
       let interim = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          currentText += transcript + ' ';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) {
+          currentText += e.results[i][0].transcript + ' ';
         } else {
-          interim += transcript;
+          interim += e.results[i][0].transcript;
         }
       }
       setTranscript(currentText + interim, 'recording');
     };
 
-    speechRecognition.onend = () => {
-      stopRecording();
+    recognition.onend = () => {
+      stopRecord();
     };
 
-    speechRecognition.onerror = (event) => {
-      showError('Audio error: ' + event.error);
-      stopRecording();
+    recognition.onerror = (e) => {
+      showError('Mic error: ' + e.error);
+      stopRecord();
     };
 
-    speechRecognition.start();
+    recognition.start();
   }
 
-  function stopRecording() {
+  function stopRecord() {
     isRecording = false;
-    if (speechRecognition) {
-      speechRecognition.stop();
-    }
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
-      mediaStream = null;
-    }
-
+    if (recognition) recognition.stop();
+    if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+    
     document.getElementById('micBtn').classList.remove('listening');
-    clearModeIndicator();
-
+    
     if (currentText.trim()) {
       setTranscript(currentText.trim(), '');
       setStatus('Input captured — press GO');
     } else {
       setTranscript('', '');
-      setStatus('No speech detected — try again');
+      setStatus('No speech — try again');
     }
   }
 
-  // ============== API ==============
+  // API
   async function submitQuestion() {
     const text = currentText.trim();
     if (!text) {
-      showError('No input captured — press Record first');
+      showError('Press Record first');
       return;
     }
 
-    addMessage('interviewer', text);
+    addMsg('interviewer', text);
     currentText = '';
     setTranscript('', '');
-    conversationHistory.push({ role: 'user', content: text });
+    history.push({ role: 'user', content: text });
 
     setStatus('⏳ Thinking...');
     clearError();
 
     try {
-      const response = await fetch('/api/chat', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
-          messages: [
-            { role: 'system', content: 'You are an expert interview coach. Answer concisely in 2-3 sentences.' },
-            ...conversationHistory
-          ],
+          messages: [{ role: 'system', content: 'Expert interview coach. Answer in 2-3 sentences.' }, ...history],
           max_tokens: 300
         })
       });
 
-      const data = await response.json();
-
+      const data = await res.json();
+      
       if (data.error) {
-        showError('API Error: ' + data.error);
-        conversationHistory.pop();
+        showError('API error');
+        history.pop();
         return;
       }
 
       const reply = data.choices[0].message.content;
-      addMessage('ai', reply);
-      conversationHistory.push({ role: 'assistant', content: reply });
-
+      addMsg('ai', reply);
+      history.push({ role: 'assistant', content: reply });
       saveTranscript();
       setStatus('Ready — press Record to continue');
-    } catch (error) {
-      showError('Connection error: ' + error.message);
-      conversationHistory.pop();
+    } catch (e) {
+      showError('Connection error');
+      history.pop();
     }
   }
 
-  // ============== UI ==============
-  function addMessage(role, text) {
+  // UI
+  function addMsg(role, text) {
     const container = document.getElementById('messagesList');
     const msg = document.createElement('div');
     msg.className = 'msg ' + role;
-    const avatarClass = role === 'ai' ? 'ai-av' : 'interviewer-av';
+    const av = role === 'ai' ? 'D2N' : 'Q';
+    const avClass = role === 'ai' ? 'ai-av' : 'interviewer-av';
     const label = role === 'ai' ? 'Voxera Insight' : 'Your Question';
-    msg.innerHTML = `
-      <div class="avatar ${avatarClass}">${role === 'ai' ? 'D2N' : 'Q'}</div>
-      <div class="bubble">
-        <div class="label">${label}</div>
-        ${text}
-      </div>
-    `;
+    msg.innerHTML = `<div class="avatar ${avClass}">${av}</div><div class="bubble"><div class="label">${label}</div>${text}</div>`;
     container.appendChild(msg);
     msg.scrollIntoView({ behavior: 'smooth' });
   }
@@ -370,45 +330,27 @@
     box.className = 'transcript-box' + (mode ? ' ' + mode : '');
   }
 
-  function setStatus(msg) {
-    document.getElementById('status').textContent = msg;
-  }
+  function setStatus(msg) { document.getElementById('status').textContent = msg; }
+  function showError(msg) { document.getElementById('errorMsg').textContent = msg; }
+  function clearError() { document.getElementById('errorMsg').textContent = ''; }
 
-  function showError(msg) {
-    document.getElementById('errorMsg').textContent = msg;
-  }
-
-  function clearError() {
-    document.getElementById('errorMsg').textContent = '';
-  }
-
-  function setModeIndicator(mode) {
-    const indicator = document.getElementById('modeIndicator');
-    indicator.style.display = 'block';
-    const stereoOn = document.getElementById('stereoToggle').checked;
-    indicator.textContent = stereoOn ? '📡 System Audio Mode' : '🎤 Microphone Mode';
-  }
-
-  function clearModeIndicator() {
-    document.getElementById('modeIndicator').style.display = 'none';
-  }
-
-  // ============== STORAGE ==============
+  // STORAGE
   function saveTranscript() {
-    const transcript = {
+    const t = {
       timestamp: new Date().toISOString(),
       username: window.currentUsername,
-      conversations: conversationHistory
+      conversations: history
     };
-    const transcripts = JSON.parse(localStorage.getItem('transcripts') || '[]');
-    transcripts.push(transcript);
-    localStorage.setItem('transcripts', JSON.stringify(transcripts));
+    const all = JSON.parse(localStorage.getItem('transcripts') || '[]');
+    all.push(t);
+    localStorage.setItem('transcripts', JSON.stringify(all));
   }
 
-  // ============== INIT ==============
+  // INIT
   window.addEventListener('load', () => {
     if (localStorage.getItem('currentUser')) {
-      showApp();
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('appScreen').classList.remove('hidden');
     }
   });
 </script>
