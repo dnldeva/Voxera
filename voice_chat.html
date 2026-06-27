@@ -87,7 +87,28 @@
 </style>
 </head>
 <body>
+ 
+<script>
+  // Multi-user password authentication
+  const validUsers = {
+    'alice': 'password123',
+    'bob': 'securepass456',
+    'charlie': 'mypassword789',
+    'user1': 'test123',
+    'admin': 'adminpass999'
+  };
+  
+  const username = prompt('👤 Enter username:');
+  const password = prompt('🔐 Enter password:');
+  
+  if (!validUsers[username] || validUsers[username] !== password) {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><div style="text-align:center;"><h1>🔒 Access Denied</h1><p>Invalid username or password.</p><p>Contact admin for credentials.</p></div></div>';
+    throw new Error('Unauthorized');
+  }
+</script>
+
 <div class="app">
+
   <div class="header">
     <div class="logo-mark">D2N</div>
     <div class="logo-text">
