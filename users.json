@@ -12,5 +12,12 @@
     "expiryHours": 24,
     "createdAt": "2026-06-27T00:00:00.000Z",
     "expiresAt": "2026-06-28T00:00:00.000Z"
+  },
+  {
+    "username": "charlie",
+    "password": "mypassword789",
+    "expiryHours": 24,
+    "createdAt": "2026-06-27T00:00:00.000Z",
+    "expiresAt": "2026-06-28T00:00:00.000Z"
   }
 ]
