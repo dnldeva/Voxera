@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Voxera — Interview Assistant</title>
+<title>Voxera  Interview Assistant</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ec; }
   
-  /* LOGIN SCREEN */
   .login-screen { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
   .login-screen.hidden { display: none; }
   .login-box { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); width: 100%; max-width: 400px; }
@@ -23,7 +22,6 @@
   .login-btn:hover { background: #2a2a4e; }
   .login-error { color: #c0392b; text-align: center; margin-top: 16px; font-size: 13px; min-height: 18px; }
   
-  /* APP SCREEN */
   .app { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 24px 0; }
   .app.hidden { display: none; }
   .app-container { width: 650px; background: #fff; border-radius: 18px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); overflow: hidden; display: flex; flex-direction: column; }
@@ -71,17 +69,21 @@
   .right-controls { display: flex; align-items: center; gap: 14px; }
   .go-btn { width: 78px; height: 78px; border-radius: 50%; border: none; background: #1a1a2e; color: #EF9F27; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 12px rgba(26,26,46,0.3); display: flex; align-items: center; justify-content: center; }
   .go-btn:hover { background: #2a2a4e; transform: scale(1.05); }
+  .go-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  
   .interviewer-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .interviewer-btn button { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #1a1a2e; background: #fff; cursor: pointer; font-weight: 600; font-size: 28px; display: flex; align-items: center; justify-content: center; }
+  .interviewer-btn button { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #1a1a2e; background: #fff; cursor: pointer; font-weight: 600; font-size: 28px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
   .interviewer-btn button:hover { background: #1a1a2e; color: #EF9F27; }
   .interviewer-btn button.listening { background: #1a1a2e; color: #E24B4A; animation: pulse 1s infinite; }
   .interviewer-btn span { font-size: 11px; color: #1a1a2e; font-weight: 600; text-transform: uppercase; }
+  
   .candidate-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .candidate-btn button { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #2e7d32; background: #fff; cursor: pointer; font-weight: 600; font-size: 28px; display: flex; align-items: center; justify-content: center; }
+  .candidate-btn button { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #2e7d32; background: #fff; cursor: pointer; font-weight: 600; font-size: 28px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
   .candidate-btn button:hover { background: #e8f5e9; color: #2e7d32; }
   .candidate-btn button.listening { background: #e8f5e9; color: #E24B4A; animation: pulse 1s infinite; border-color: #E24B4A; }
   .candidate-btn span { font-size: 11px; color: #2e7d32; font-weight: 600; text-transform: uppercase; }
   @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(226,75,74,0.3)} 50%{box-shadow:0 0 0 12px rgba(226,75,74,0)} }
+  
   .status { font-size: 13px; color: #999; text-align: center; margin-top: 10px; }
   .error-msg { font-size: 12px; color: #c0392b; text-align: center; margin-top: 4px; }
   .mode-indicator { font-size: 12px; text-align: center; padding: 5px 14px; border-radius: 20px; display: none; margin-bottom: 6px; background: #f0f0f8; color: #1a1a2e; border: 1px solid #1a1a2e; }
@@ -97,7 +99,7 @@
     <h1 class="login-title">Voxera</h1>
     <p class="login-subtitle">AI Interview Assistant</p>
     
-    <form onsubmit="AUTH.handleLogin(event)">
+    <form onsubmit="handleLogin(event)">
       <div class="form-group">
         <label>Username</label>
         <input type="text" id="usernameField" placeholder="e.g., alice" required autofocus />
@@ -135,7 +137,7 @@
           <span class="toggle-slider"></span>
         </label>
       </div>
-      <span class="transcript-link" onclick="window.location.href='user-transcripts.html'">📋 My Transcripts</span>
+      <span class="transcript-link" onclick="window.location.href='user-transcripts.html'"> My Transcripts</span>
     </div>
 
     <div class="messages" id="messagesList">
@@ -154,321 +156,278 @@
       <div class="mode-indicator" id="modeIndicator"></div>
       <div class="controls-row">
         <div class="candidate-btn">
-          <button id="candidateMicBtn" onclick="RECORDING.toggleMic('candidate')" title="Record your response">🎤</button>
+          <button id="candidateMicBtn" onclick="startRecording('candidate')" title="Record your response"></button>
           <span>Respond</span>
         </div>
         <div class="right-controls">
           <div class="interviewer-btn">
-            <button id="interviewerMicBtn" onclick="RECORDING.toggleMic('interviewer')" title="Record interviewer question">🎙️</button>
+            <button id="interviewerMicBtn" onclick="startRecording('interviewer')" title="Record interviewer question"></button>
             <span>Interviewer</span>
           </div>
-          <button class="go-btn" id="goBtn" onclick="API.submitQuestion()">GO</button>
+          <button class="go-btn" id="goBtn" onclick="submitQuestion()">GO</button>
         </div>
       </div>
-      <div class="status" id="status">Ready — press Interviewer to begin</div>
+      <div class="status" id="status">Ready  press Interviewer to begin</div>
       <div class="error-msg" id="errorMsg"></div>
     </div>
 
     <div class="footer">
-      <span>© 2026 D2NL Midea</span>
+      <span> 2026 D2NL Midea</span>
       <span>Voxera v2.3</span>
     </div>
   </div>
 </div>
 
 <script>
-  // ============================================
-  // AUTHENTICATION MODULE
-  // ============================================
-  const AUTH = {
-    validUsers: {
-      'alice': 'password123',
-      'bob': 'securepass456',
-      'charlie': 'mypassword789'
-    },
+  // ============== GLOBAL STATE ==============
+  let speechRecognition = null;
+  let isRecording = false;
+  let currentText = '';
+  let currentMode = null;
+  let mediaStream = null;
+  let conversationHistory = [];
 
-    handleLogin(event) {
-      event.preventDefault();
-      const username = document.getElementById('usernameField').value.trim();
-      const password = document.getElementById('passwordField').value.trim();
-      const errorEl = document.getElementById('loginError');
-
-      if (!this.validUsers[username] || this.validUsers[username] !== password) {
-        errorEl.textContent = 'Invalid username or password';
-        document.getElementById('passwordField').value = '';
-        return;
-      }
-
-      window.currentUsername = username;
-      localStorage.setItem('currentUser', username);
-      this.showApp();
-    },
-
-    showApp() {
-      document.getElementById('loginScreen').classList.add('hidden');
-      document.getElementById('appScreen').classList.remove('hidden');
-    },
-
-    isLoggedIn() {
-      return !!localStorage.getItem('currentUser');
-    }
+  const VALID_USERS = {
+    'alice': 'password123',
+    'bob': 'securepass456',
+    'charlie': 'mypassword789'
   };
 
-  // ============================================
-  // RECORDING MODULE (Core Functionality)
-  // ============================================
-  const RECORDING = {
-    SR: window.SpeechRecognition || window.webkitSpeechRecognition,
-    recognition: null,
-    isListening: false,
-    capturedText: '',
-    currentMode: null,
-    stream: null,
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    async toggleMic(mode) {
-      if (!this.SR) {
-        UI.showError('Please use Chrome or Edge browser');
-        return;
-      }
+  // ============== LOGIN ==============
+  function handleLogin(event) {
+    event.preventDefault();
+    const username = document.getElementById('usernameField').value.trim();
+    const password = document.getElementById('passwordField').value.trim();
 
-      if (this.isListening) {
-        this.stop();
-        return;
-      }
+    if (!VALID_USERS[username] || VALID_USERS[username] !== password) {
+      document.getElementById('loginError').textContent = 'Invalid username or password';
+      document.getElementById('passwordField').value = '';
+      return;
+    }
 
-      const useStereo = document.getElementById('stereoToggle').checked;
-      
-      if (useStereo && mode === 'interviewer') {
-        this.captureSystemAudio(mode);
-      } else {
-        this.captureMicrophone(mode);
-      }
-    },
+    window.currentUsername = username;
+    localStorage.setItem('currentUser', username);
+    showApp();
+  }
 
-    async captureSystemAudio(mode) {
-      try {
-        this.stream = await navigator.mediaDevices.getDisplayMedia({
+  function showApp() {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('appScreen').classList.remove('hidden');
+  }
+
+  // ============== RECORDING ==============
+  async function startRecording(mode) {
+    if (!SR) {
+      showError('Please use Chrome or Edge browser');
+      return;
+    }
+
+    if (isRecording) {
+      stopRecording();
+      return;
+    }
+
+    isRecording = true;
+    currentMode = mode;
+    currentText = '';
+    clearError();
+
+    const btnId = mode === 'interviewer' ? 'interviewerMicBtn' : 'candidateMicBtn';
+    document.getElementById(btnId).classList.add('listening');
+    setModeIndicator(mode);
+    setTranscript('', 'recording');
+    setStatus(mode === 'interviewer' ? ' Recording (system audio)...' : ' Recording (microphone)...');
+
+    try {
+      if (mode === 'interviewer' && document.getElementById('stereoToggle').checked) {
+        // Get system audio via screen share
+        mediaStream = await navigator.mediaDevices.getDisplayMedia({
           video: false,
           audio: { echoCancellation: false, noiseSuppression: false }
         });
-        this.startRecognition(mode);
-      } catch (e) {
-        UI.showError('Screen share cancelled or unavailable');
-      }
-    },
-
-    async captureMicrophone(mode) {
-      try {
-        this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        this.startRecognition(mode);
-      } catch (e) {
-        UI.showError('Microphone access denied');
-      }
-    },
-
-    startRecognition(mode) {
-      this.isListening = true;
-      this.currentMode = mode;
-      this.capturedText = '';
-      UI.clearError();
-
-      const btnId = mode === 'interviewer' ? 'interviewerMicBtn' : 'candidateMicBtn';
-      document.getElementById(btnId).classList.add('listening');
-      UI.setModeIndicator(mode);
-      UI.setTranscript('', 'recording');
-      UI.setStatus(mode === 'interviewer' ? '📡 Recording system audio...' : '⏺ Recording...');
-
-      this.recognition = new this.SR();
-      this.recognition.lang = 'en-GB';
-      this.recognition.continuous = true;
-      this.recognition.interimResults = true;
-
-      this.recognition.onresult = (e) => {
-        let interim = '';
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          if (e.results[i].isFinal) {
-            this.capturedText += e.results[i][0].transcript + ' ';
-          } else {
-            interim += e.results[i][0].transcript;
-          }
-        }
-        UI.setTranscript(this.capturedText + interim, 'recording');
-      };
-
-      this.recognition.onend = () => {
-        this.onRecognitionEnd();
-      };
-
-      this.recognition.onerror = (e) => {
-        UI.showError('Microphone error: ' + e.error);
-        this.onRecognitionEnd();
-      };
-
-      this.recognition.start();
-    },
-
-    onRecognitionEnd() {
-      this.isListening = false;
-      const btnId = this.currentMode === 'interviewer' ? 'interviewerMicBtn' : 'candidateMicBtn';
-      document.getElementById(btnId).classList.remove('listening');
-      UI.clearModeIndicator();
-
-      if (this.stream) {
-        this.stream.getTracks().forEach(t => t.stop());
-      }
-
-      if (this.capturedText.trim()) {
-        UI.setTranscript(this.capturedText.trim(), this.currentMode);
-        UI.setStatus('Input captured — press GO');
       } else {
-        UI.setTranscript('', '');
-        UI.setStatus('No speech detected — try again');
+        // Get microphone
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       }
-    },
 
-    stop() {
-      if (this.recognition) {
-        this.recognition.stop();
-      }
-    },
-
-    getText() {
-      return this.capturedText.trim();
-    },
-
-    clear() {
-      this.capturedText = '';
-      UI.setTranscript('', '');
+      startSpeechRecognition(mode);
+    } catch (error) {
+      isRecording = false;
+      document.getElementById(btnId).classList.remove('listening');
+      showError('Microphone/screen share access denied');
     }
-  };
+  }
 
-  // ============================================
-  // API MODULE
-  // ============================================
-  const API = {
-    history: [],
-    
-    async submitQuestion() {
-      const text = RECORDING.getText();
-      if (!text) {
-        UI.showError('No input captured — press Interviewer first');
+  function startSpeechRecognition(mode) {
+    speechRecognition = new SR();
+    speechRecognition.lang = 'en-GB';
+    speechRecognition.continuous = true;
+    speechRecognition.interimResults = true;
+
+    speechRecognition.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          currentText += transcript + ' ';
+        } else {
+          interim += transcript;
+        }
+      }
+      setTranscript(currentText + interim, 'recording');
+    };
+
+    speechRecognition.onend = () => {
+      stopRecording();
+    };
+
+    speechRecognition.onerror = (event) => {
+      showError('Microphone error: ' + event.error);
+      stopRecording();
+    };
+
+    speechRecognition.start();
+  }
+
+  function stopRecording() {
+    isRecording = false;
+    if (speechRecognition) {
+      speechRecognition.stop();
+    }
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+      mediaStream = null;
+    }
+
+    const interviewerBtn = document.getElementById('interviewerMicBtn');
+    const candidateBtn = document.getElementById('candidateMicBtn');
+    interviewerBtn.classList.remove('listening');
+    candidateBtn.classList.remove('listening');
+    clearModeIndicator();
+
+    if (currentText.trim()) {
+      setTranscript(currentText.trim(), currentMode);
+      setStatus('Input captured  press GO');
+    } else {
+      setTranscript('', '');
+      setStatus('No speech detected  try again');
+    }
+  }
+
+  // ============== API ==============
+  async function submitQuestion() {
+    const text = currentText.trim();
+    if (!text) {
+      showError('No input captured  press Interviewer or Respond first');
+      return;
+    }
+
+    addMessage(currentMode || 'interviewer', text);
+    currentText = '';
+    setTranscript('', '');
+    conversationHistory.push({ role: 'user', content: text });
+
+    setStatus(' Thinking...');
+    clearError();
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: 'You are an expert interview coach. Answer concisely in 2-3 sentences.' },
+            ...conversationHistory
+          ],
+          max_tokens: 300
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        showError('API Error: ' + data.error);
+        conversationHistory.pop();
         return;
       }
 
-      UI.addMessage(RECORDING.currentMode || 'interviewer', text);
-      RECORDING.clear();
-      this.history.push({ role: 'user', content: text });
+      const reply = data.choices[0].message.content;
+      addMessage('ai', reply);
+      conversationHistory.push({ role: 'assistant', content: reply });
 
-      UI.setStatus('⏳ Thinking...');
-      UI.clearError();
-
-      try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
-            messages: [
-              { role: 'system', content: 'You are an expert interview coach. Answer concisely in 2-3 sentences.' },
-              ...this.history
-            ],
-            max_tokens: 300
-          })
-        });
-
-        const data = await response.json();
-        
-        if (data.error) {
-          UI.showError('API Error: ' + data.error);
-          return;
-        }
-
-        const reply = data.choices[0].message.content;
-        UI.addMessage('ai', reply);
-        this.history.push({ role: 'assistant', content: reply });
-
-        STORAGE.saveTranscript(this.history);
-        UI.setStatus('Ready — press Interviewer to continue');
-      } catch (error) {
-        UI.showError('Connection error: ' + error.message);
-      }
+      saveTranscript();
+      setStatus('Ready  press Interviewer or Respond to continue');
+    } catch (error) {
+      showError('Connection error: ' + error.message);
+      conversationHistory.pop();
     }
-  };
+  }
 
-  // ============================================
-  // UI MODULE
-  // ============================================
-  const UI = {
-    addMessage(role, text) {
-      const container = document.getElementById('messagesList');
-      const msg = document.createElement('div');
-      msg.className = 'msg ' + role;
-      msg.innerHTML = `
-        <div class="avatar ${role}-av">${role === 'ai' ? 'D2N' : role === 'candidate' ? 'YOU' : 'INPUT'}</div>
-        <div class="bubble">
-          <div class="label">${role === 'ai' ? 'Voxera Insight' : role === 'candidate' ? 'Your Response' : 'Captured Input'}</div>
-          ${text}
-        </div>
-      `;
-      container.appendChild(msg);
-      msg.scrollIntoView({ behavior: 'smooth' });
-    },
+  // ============== UI ==============
+  function addMessage(role, text) {
+    const container = document.getElementById('messagesList');
+    const msg = document.createElement('div');
+    msg.className = 'msg ' + role;
+    const avatarClass = role === 'ai' ? 'ai-av' : role === 'candidate' ? 'candidate-av' : 'interviewer-av';
+    const label = role === 'ai' ? 'Voxera Insight' : role === 'candidate' ? 'Your Response' : 'Captured Input';
+    msg.innerHTML = `
+      <div class="avatar ${avatarClass}">${role === 'ai' ? 'D2N' : role === 'candidate' ? 'YOU' : 'Q'}</div>
+      <div class="bubble">
+        <div class="label">${label}</div>
+        ${text}
+      </div>
+    `;
+    container.appendChild(msg);
+    msg.scrollIntoView({ behavior: 'smooth' });
+  }
 
-    setTranscript(text, mode) {
-      const box = document.getElementById('transcriptBox');
-      box.textContent = text || 'Audio transcript will appear here...';
-      box.className = 'transcript-box' + (mode ? ' ' + mode : '');
-    },
+  function setTranscript(text, mode) {
+    const box = document.getElementById('transcriptBox');
+    box.textContent = text || 'Audio transcript will appear here...';
+    box.className = 'transcript-box' + (mode ? ' ' + mode : '');
+  }
 
-    setStatus(msg) {
-      document.getElementById('status').textContent = msg;
-    },
+  function setStatus(msg) {
+    document.getElementById('status').textContent = msg;
+  }
 
-    showError(msg) {
-      document.getElementById('errorMsg').textContent = msg;
-    },
+  function showError(msg) {
+    document.getElementById('errorMsg').textContent = msg;
+  }
 
-    clearError() {
-      document.getElementById('errorMsg').textContent = '';
-    },
+  function clearError() {
+    document.getElementById('errorMsg').textContent = '';
+  }
 
-    setModeIndicator(mode) {
-      const indicator = document.getElementById('modeIndicator');
-      indicator.style.display = 'block';
-      indicator.textContent = mode === 'interviewer' ? '📡 System audio mode' : '⏺ Microphone mode';
-    },
+  function setModeIndicator(mode) {
+    const indicator = document.getElementById('modeIndicator');
+    indicator.style.display = 'block';
+    indicator.textContent = mode === 'interviewer' ? ' System audio mode' : ' Microphone mode';
+  }
 
-    clearModeIndicator() {
-      document.getElementById('modeIndicator').style.display = 'none';
-    }
-  };
+  function clearModeIndicator() {
+    document.getElementById('modeIndicator').style.display = 'none';
+  }
 
-  // ============================================
-  // STORAGE MODULE
-  // ============================================
-  const STORAGE = {
-    saveTranscript(history) {
-      const transcript = {
-        timestamp: new Date().toISOString(),
-        username: window.currentUsername,
-        conversations: history
-      };
+  // ============== STORAGE ==============
+  function saveTranscript() {
+    const transcript = {
+      timestamp: new Date().toISOString(),
+      username: window.currentUsername,
+      conversations: conversationHistory
+    };
+    const transcripts = JSON.parse(localStorage.getItem('transcripts') || '[]');
+    transcripts.push(transcript);
+    localStorage.setItem('transcripts', JSON.stringify(transcripts));
+  }
 
-      const transcripts = JSON.parse(localStorage.getItem('transcripts') || '[]');
-      transcripts.push(transcript);
-      localStorage.setItem('transcripts', JSON.stringify(transcripts));
-    }
-  };
-
-  // ============================================
-  // INITIALIZATION
-  // ============================================
-  window.addEventListener('DOMContentLoaded', () => {
-    if (AUTH.isLoggedIn()) {
-      AUTH.showApp();
-    } else {
-      document.getElementById('loginScreen').classList.remove('hidden');
-      document.getElementById('appScreen').classList.add('hidden');
+  // ============== INIT ==============
+  window.addEventListener('load', () => {
+    if (localStorage.getItem('currentUser')) {
+      showApp();
     }
   });
 </script>
