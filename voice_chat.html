@@ -108,6 +108,9 @@
   }
   window.currentUsername = username;
   localStorage.setItem('currentUser', username);
+  setTimeout(() => {
+  document.getElementById('app-container').classList.add('authenticated');
+}, 100);
   document.getElementById('app-container').classList.add('authenticated');
 </script>
 <div id="app-container">
