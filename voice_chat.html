@@ -3,399 +3,255 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Voxera  D2NL Midea</title>
+<title>Voxera Login</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ec; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 24px 0; }
-  .app { width: 650px; background: #fff; border-radius: 18px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); display: flex; flex-direction: column; overflow: hidden; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ec; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+  
+  .login-container { width: 100%; max-width: 400px; background: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); }
+  .logo { width: 60px; height: 60px; background: #94FF33; border-radius: 12px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: #1a1a1a; }
+  h1 { font-size: 28px; color: #1a1a2e; margin-bottom: 8px; text-align: center; }
+  p { text-align: center; color: #999; margin-bottom: 32px; font-size: 14px; }
+  
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: #777; margin-bottom: 8px; text-transform: uppercase; }
+  .form-group input { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; }
+  .form-group input:focus { outline: none; border-color: #EF9F27; }
+  
+  .login-btn { width: 100%; padding: 12px; background: #1a1a2e; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; margin-top: 20px; }
+  .login-btn:hover { background: #2a2a4e; }
+  .login-btn:active { transform: scale(0.98); }
+  
+  .error { color: #c0392b; text-align: center; margin-top: 16px; font-size: 13px; }
+  
+  .app { display: none; }
+  .app.visible { display: flex; }
+  
+  .app { width: 650px; background: #fff; border-radius: 18px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); overflow: hidden; flex-direction: column; }
   .header { padding: 16px 24px; background: #1a1a2e; display: flex; align-items: center; gap: 12px; }
-  .logo-mark { width: 36px; height: 36px; border-radius: 8px; background: #94FF33; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #1a1a1a; letter-spacing: -0.5px; flex-shrink: 0; }
+  .logo-mark { width: 36px; height: 36px; border-radius: 8px; background: #94FF33; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #1a1a1a; flex-shrink: 0; }
   .logo-text { display: flex; flex-direction: column; }
-  .logo-name { font-size: 17px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+  .logo-name { font-size: 17px; font-weight: 700; color: #fff; }
   .logo-sub { font-size: 10px; color: #EF9F27; letter-spacing: 1.5px; text-transform: uppercase; }
   .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-  .plan-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: rgba(239,159,39,0.15); color: #EF9F27; border: 1px solid rgba(239,159,39,0.3); }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4caf50; box-shadow: 0 0 6px rgba(76,175,80,0.6); }
+  .plan-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: rgba(239,159,39,0.15); color: #EF9F27; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4caf50; }
   .toggle-row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 8px 20px; background: #f8f8f5; border-bottom: 1px solid #eee; }
-  .toggle-label { font-size: 12px; color: #777; }
-  .toggle-wrap { position: relative; width: 40px; height: 22px; }
-  .toggle-wrap input { opacity: 0; width: 0; height: 0; }
-  .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ccc; border-radius: 22px; transition: 0.3s; }
-  .toggle-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s; }
-  input:checked + .toggle-slider { background: #EF9F27; }
-  input:checked + .toggle-slider:before { transform: translateX(18px); }
-  .zoom-popup { display: none; position: sticky; top: 0; z-index: 10; padding: 14px 20px; background: #1a1a2e; border-bottom: 2px solid #EF9F27; font-size: 26px; line-height: 1.5; color: #fff; min-height: 64px; flex-wrap: wrap; gap: 6px; align-items: center; }
-  .zoom-popup.visible { display: flex; }
-  .zoom-popup .zword { color: #ccc; font-size: 26px; }
-  .zoom-popup .zword.zhighlight { color: #EF9F27; font-weight: 800; font-size: 30px; background: rgba(239,159,39,0.15); border-radius: 6px; padding: 0 4px; text-decoration: underline; text-underline-offset: 4px; }
-  .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; min-height: 280px; max-height: 360px; }
+  .transcript-link { cursor: pointer; color: #EF9F27; text-decoration: underline; font-size: 11px; }
+  
+  .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; max-height: 360px; }
   .msg { display: flex; gap: 12px; align-items: flex-start; }
-  .msg.interviewer { flex-direction: row; }
-  .msg.ai { flex-direction: row; }
-  .msg.candidate { flex-direction: row-reverse; }
-  .avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; text-align: center; line-height: 1.2; }
-  .avatar.interviewer-av { background: #1a1a2e; color: #EF9F27; font-size: 9px; }
-  .avatar.ai-av { background: #94FF33; color: #1a1a1a; font-size: 9px; }
-  .avatar.candidate-av { background: #e8f5e9; color: #2e7d32; font-size: 9px; }
-  .bubble { max-width: 80%; padding: 12px 16px; border-radius: 14px; font-size: 17px; line-height: 1.65; }
-  .msg.interviewer .bubble { background: #f0f0f8; color: #1a1a2e; border-radius: 4px 14px 14px 14px; border-left: 3px solid #1a1a2e; }
-  .msg.ai .bubble { background: #FFF8EC; color: #5a3e00; border-radius: 4px 14px 14px 14px; border-left: 3px solid #EF9F27; }
-  .msg.candidate .bubble { background: #e8f5e9; color: #1b5e20; border-radius: 14px 4px 14px 14px; }
-  .label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 5px; opacity: 0.55; text-transform: uppercase; }
-  .word { display: inline; transition: background 0.15s; border-radius: 3px; padding: 0 1px; }
-  .word.active-word { background: #EF9F27; color: #1a1a1a; font-weight: 700; padding: 0 2px; }
-  .typing { display: flex; gap: 5px; align-items: center; padding: 4px 0; }
-  .typing span { width: 8px; height: 8px; border-radius: 50%; background: #EF9F27; animation: blink 1.2s infinite; }
-  .typing span:nth-child(2) { animation-delay: 0.2s; }
-  .typing span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
-  .transcript-box { margin: 0 16px; min-height: 54px; background: #f8f8f5; border-radius: 10px; padding: 12px 16px; font-size: 16px; color: #777; font-style: italic; border: 1.5px dashed #ddd; display: flex; align-items: center; }
-  .transcript-box.active { background: #f0f0f8; border-color: #1a1a2e; color: #1a1a2e; font-style: normal; }
-  .transcript-box.recording { background: #fff8f8; border-color: #E24B4A; color: #333; font-style: normal; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; background: #94FF33; color: #1a1a1a; }
+  .bubble { max-width: 80%; padding: 12px 16px; border-radius: 14px; font-size: 14px; line-height: 1.65; background: #FFF8EC; color: #5a3e00; }
+  
+  .transcript-box { margin: 0 16px; min-height: 54px; background: #f8f8f5; border-radius: 10px; padding: 12px 16px; font-size: 14px; color: #777; border: 1.5px dashed #ddd; display: flex; align-items: center; }
+  .transcript-box.active { background: #f0f0f8; border-color: #1a1a2e; color: #1a1a2e; }
+  
   .bottom { padding: 14px 20px 18px; border-top: 1px solid #eee; background: #fafafa; }
-  .controls-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
-  .right-controls { display: flex; align-items: center; gap: 14px; }
-  .go-btn { width: 78px; height: 78px; border-radius: 50%; border: none; background: #1a1a2e; color: #EF9F27; font-size: 17px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 12px rgba(26,26,46,0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; letter-spacing: 1px; }
+  .controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+  .go-btn { width: 78px; height: 78px; border-radius: 50%; border: none; background: #1a1a2e; color: #EF9F27; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 12px rgba(26,26,46,0.3); display: flex; align-items: center; justify-content: center; }
   .go-btn:hover { background: #2a2a4e; transform: scale(1.05); }
-  .go-btn:active { transform: scale(0.97); }
-  .go-btn svg { width: 20px; height: 20px; fill: #EF9F27; }
-  .interviewer-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .interviewer-btn button { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #1a1a2e; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-  .interviewer-btn button svg { width: 27px; height: 27px; fill: #1a1a2e; }
-  .interviewer-btn button:hover { background: #1a1a2e; }
-  .interviewer-btn button:hover svg { fill: #EF9F27; }
-  .interviewer-btn button.listening { background: #1a1a2e; border-color: #E24B4A; animation: pulse-dark 1s infinite; }
-  .interviewer-btn button.listening svg { fill: #E24B4A; }
-  .interviewer-btn span { font-size: 11px; color: #1a1a2e; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-  .candidate-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .candidate-btn button { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #2e7d32; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-  .candidate-btn button svg { width: 27px; height: 27px; fill: #2e7d32; }
-  .candidate-btn button:hover { background: #e8f5e9; }
-  .candidate-btn button.listening { background: #e8f5e9; border-color: #E24B4A; animation: pulse-green 1s infinite; }
-  .candidate-btn button.listening svg { fill: #E24B4A; }
-  .candidate-btn span { font-size: 11px; color: #2e7d32; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-  @keyframes pulse-dark { 0%,100%{box-shadow:0 0 0 0 rgba(26,26,46,0.3)} 50%{box-shadow:0 0 0 12px rgba(26,26,46,0)} }
-  @keyframes pulse-green { 0%,100%{box-shadow:0 0 0 0 rgba(46,125,50,0.3)} 50%{box-shadow:0 0 0 12px rgba(46,125,50,0)} }
-  .status { font-size: 13px; color: #999; text-align: center; margin-top: 10px; min-height: 18px; }
-  .error { font-size: 12px; color: #c0392b; text-align: center; min-height: 16px; margin-top: 4px; }
-  .mode-indicator { font-size: 12px; text-align: center; padding: 5px 14px; border-radius: 20px; display: none; margin-bottom: 6px; }
-  .mode-indicator.interviewer { display: block; background: #f0f0f8; color: #1a1a2e; border: 1px solid #1a1a2e; }
-  .mode-indicator.candidate { display: block; background: #e8f5e9; color: #2e7d32; border: 1px solid #2e7d32; }
-  .footer { padding: 10px 24px; background: #1a1a2e; display: flex; align-items: center; justify-content: space-between; }
-  .footer-left { font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 0.5px; }
-  .footer-right { font-size: 11px; color: #EF9F27; letter-spacing: 0.5px; }
-  .transcript-link { cursor: pointer; color: #EF9F27; text-decoration: underline; }
+  .interviewer-btn button { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #1a1a2e; background: #fff; cursor: pointer; font-weight: 600; font-size: 28px; }
+  .interviewer-btn button:hover { background: #1a1a2e; color: #EF9F27; }
+  .interviewer-btn button.listening { background: #1a1a2e; color: #E24B4A; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(226,75,74,0.3)} 50%{box-shadow:0 0 0 12px rgba(226,75,74,0)} }
+  .status { font-size: 13px; color: #999; text-align: center; margin-top: 10px; }
+  .error-msg { font-size: 12px; color: #c0392b; text-align: center; margin-top: 4px; }
+  .footer { padding: 10px 24px; background: #1a1a2e; font-size: 11px; color: rgba(255,255,255,0.35); display: flex; justify-content: space-between; }
 </style>
 </head>
 <body>
- 
-<script>
-  // STRICT LOGIN VALIDATION
-  const validUsers = {
-    'alice': 'password123',
-    'bob': 'securepass456',
-    'charlie': 'mypassword789',
-    'user1': 'test123'
-  };
-  
-  const username = prompt(' Enter username:');
-  const password = prompt(' Enter password:');
-  
-  if (!validUsers[username] || validUsers[username] !== password) {
-    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><div style="text-align:center;"><h1> Access Denied</h1><p>Invalid username or password.</p><p>Contact admin for credentials.</p></div></div>';
-    throw new Error('Unauthorized');
-  }
 
-  window.currentUsername = username;
-  localStorage.setItem('currentUser', username);
-</script>
+<div class="login-container" id="login-screen">
+  <div class="logo">D2N</div>
+  <h1>Voxera</h1>
+  <p>AI-Powered Interview Assistant</p>
+  
+  <form onsubmit="handleLogin(event)">
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="e.g., alice" required />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Enter password" required />
+    </div>
+    <button type="submit" class="login-btn">Sign In</button>
+    <div class="error" id="login-error"></div>
+  </form>
+</div>
 
-<div class="app">
+<div class="app" id="app">
   <div class="header">
     <div class="logo-mark">D2N</div>
     <div class="logo-text">
       <span class="logo-name">Voxera</span>
-      <span class="logo-sub">D2NL Midea  Intelligence Suite</span>
+      <span class="logo-sub">D2NL Midea</span>
     </div>
     <div class="header-right">
-      <span class="plan-badge">Pro Plan</span>
+      <span class="plan-badge">Pro</span>
       <div class="status-dot"></div>
     </div>
   </div>
+
   <div class="toggle-row">
-    <span class="toggle-label">Word highlight &amp; zoom</span>
-    <label class="toggle-wrap">
-      <input type="checkbox" id="highlight-toggle" checked />
-      <span class="toggle-slider"></span>
-    </label>
-    <span style="margin-left: auto; font-size: 11px; color: #EF9F27; cursor: pointer; text-decoration: underline;" onclick="window.location.href='user-transcripts.html'"> My Transcripts</span>
+    <span style="margin-left: auto; font-size: 11px; color: #EF9F27; cursor: pointer; text-decoration: underline;" onclick="window.location.href='user-transcripts.html'">📋 My Transcripts</span>
   </div>
-  <div class="zoom-popup" id="zoom-popup"></div>
+
   <div class="messages" id="messages">
-    <div class="msg ai">
-      <div class="avatar ai-av">D2N</div>
-      <div class="bubble">
-        <div class="label">Voxera Assistant</div>
-        Welcome! Interview context fully loaded. Press <strong>Interviewer</strong> to capture a question, then <strong>GO</strong> for an instant answer.
-      </div>
+    <div class="msg">
+      <div class="avatar">D2N</div>
+      <div class="bubble">Welcome to Voxera! Press <strong>Interviewer</strong> to record a question, then <strong>GO</strong> for an answer.</div>
     </div>
   </div>
+
   <div class="transcript-box" id="transcript-box">Audio transcript will appear here...</div>
+
   <div class="bottom">
-    <div class="mode-indicator" id="mode-indicator"></div>
-    <div class="controls-row">
-      <div class="candidate-btn">
-        <button id="candidate-mic" onclick="toggleMic('candidate')" title="Record your response">
-          <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-6 9a6 6 0 0 0 12 0h2a8 8 0 0 1-7 7.93V21h-2v-3.07A8 8 0 0 1 4 10h2z"/></svg>
-        </button>
-        <span>Respond</span>
+    <div class="controls">
+      <div class="interviewer-btn">
+        <button id="mic-btn" onclick="handleMic()" title="Record question">🎤</button>
       </div>
-      <div class="right-controls">
-        <div class="interviewer-btn">
-          <button id="interviewer-mic" onclick="toggleMic('interviewer')" title="Capture interviewer question">
-            <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-6 9a6 6 0 0 0 12 0h2a8 8 0 0 1-7 7.93V21h-2v-3.07A8 8 0 0 1 4 10h2z"/></svg>
-          </button>
-          <span>Interviewer</span>
-        </div>
-        <button class="go-btn" id="go-btn" onclick="submitQuestion()">
-          <svg viewBox="0 0 24 24"><path d="M2 12l18-9-5 9 5 9z"/></svg>
-          GO
-        </button>
-      </div>
+      <button class="go-btn" id="go-btn" onclick="submitQuestion()">GO</button>
     </div>
-    <div class="status" id="status">System ready  press Interviewer to begin (Stereo mode enabled)</div>
-    <div class="error" id="error"></div>
+    <div class="status" id="status">Ready — press Interviewer to begin</div>
+    <div class="error-msg" id="error"></div>
   </div>
+
   <div class="footer">
-    <span class="footer-left"> 2026 D2NL Midea Technologies</span>
-    <span class="footer-right">Voxera v2.1  Enterprise</span>
+    <span>© 2026 D2NL Midea</span>
+    <span>Voxera v2.1</span>
   </div>
 </div>
 
 <script>
-  const API_URL = '/api/chat';
-  const MODEL = 'llama-3.3-70b-versatile';
-  const WORD_DELAY = 520;
+  const VALID_USERS = {
+    'alice': 'password123',
+    'bob': 'securepass456',
+    'charlie': 'mypassword789'
+  };
 
-  const SYSTEM_PROMPT = `You are an expert interview coach. Provide concise, professional answers to interview questions.`;
+  function handleLogin(event) {
+    event.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
 
-  let recognition = null, isListening = false;
-  let currentMode = null, capturedText = '', history = [];
-  let highlightTimer = null;
+    if (VALID_USERS[username] && VALID_USERS[username] === password) {
+      window.currentUsername = username;
+      localStorage.setItem('currentUser', username);
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').classList.add('visible');
+    } else {
+      document.getElementById('login-error').textContent = 'Invalid username or password';
+    }
+  }
+
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let isListening = false;
+  let capturedText = '';
+  let history = [];
 
-  function isHighlightOn() { return document.getElementById('highlight-toggle').checked; }
-  function showError(m) { document.getElementById('error').textContent = m; }
+  function showError(msg) { document.getElementById('error').textContent = msg; }
   function clearError() { document.getElementById('error').textContent = ''; }
-  function setStatus(m) { document.getElementById('status').textContent = m; }
+  function setStatus(msg) { document.getElementById('status').textContent = msg; }
 
-  function setTranscript(text, mode) {
-    const box = document.getElementById('transcript-box');
-    box.textContent = text || 'Audio transcript will appear here...';
-    box.className = 'transcript-box' + (mode ? ' ' + mode : '');
-  }
-
-  function showModeIndicator(mode) {
-    const el = document.getElementById('mode-indicator');
-    if (!mode) { el.className = 'mode-indicator'; el.textContent = ''; return; }
-    el.className = 'mode-indicator ' + mode;
-    el.textContent = mode === 'interviewer' ? ' Capturing system audio...' : ' Recording response...';
-  }
-
-  function hideZoomPopup() {
-    const p = document.getElementById('zoom-popup');
-    p.className = 'zoom-popup'; p.innerHTML = '';
-  }
-
-  function splitIntoLines(words, charsPerLine) {
-    const lines = []; let currentLine = [], currentLen = 0;
-    words.forEach((w, i) => {
-      currentLine.push(i); currentLen += w.length + 1;
-      if (currentLen >= charsPerLine) { lines.push([...currentLine]); currentLine = []; currentLen = 0; }
-    });
-    if (currentLine.length) lines.push(currentLine);
-    return lines;
-  }
-
-  function showZoomLine(lineWords, activeIdx) {
-    const popup = document.getElementById('zoom-popup');
-    popup.innerHTML = ''; popup.className = 'zoom-popup visible';
-    lineWords.forEach((word, i) => {
-      const span = document.createElement('span');
-      span.className = 'zword' + (i === activeIdx ? ' zhighlight' : '');
-      span.textContent = word; popup.appendChild(span);
-      if (i < lineWords.length - 1) popup.appendChild(document.createTextNode(' '));
-    });
-  }
-
-  function addMsg(role, text, typing) {
+  function addMsg(role, text) {
     const c = document.getElementById('messages');
     const d = document.createElement('div');
-    d.className = 'msg ' + role;
-    if (typing) d.id = 'typing-msg';
-    const av = document.createElement('div');
-    av.className = 'avatar ' + (role === 'interviewer' ? 'interviewer-av' : role === 'candidate' ? 'candidate-av' : 'ai-av');
-    av.textContent = role === 'interviewer' ? 'INPUT' : role === 'candidate' ? 'YOU' : 'D2N';
-    const b = document.createElement('div');
-    b.className = 'bubble';
-    const lbl = document.createElement('div');
-    lbl.className = 'label';
-    lbl.textContent = role === 'interviewer' ? 'Captured Input' : role === 'candidate' ? 'Your Response' : 'Voxera Insight';
-    if (typing) {
-      b.innerHTML = '<div class="label">Voxera Insight</div><div class="typing"><span></span><span></span><span></span></div>';
-    } else {
-      b.appendChild(lbl);
-      if (role === 'ai' && isHighlightOn()) {
-        text.split(/(\s+)/).forEach(part => {
-          if (part.trim().length > 0) {
-            const span = document.createElement('span');
-            span.className = 'word'; span.textContent = part; b.appendChild(span);
-          } else { b.appendChild(document.createTextNode(part)); }
-        });
-      } else { b.appendChild(document.createTextNode(text)); }
-    }
-    d.appendChild(av); d.appendChild(b); c.appendChild(d);
-    d.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    return b;
+    d.className = 'msg';
+    d.innerHTML = `<div class="avatar">${role === 'ai' ? 'D2N' : 'YOU'}</div><div class="bubble"><strong>${role === 'ai' ? 'Voxera' : 'You'}:</strong> ${text}</div>`;
+    c.appendChild(d);
+    d.scrollIntoView({ behavior: 'smooth' });
   }
 
-  function removeTyping() { const e = document.getElementById('typing-msg'); if (e) e.remove(); }
+  async function handleMic() {
+    if (!SR) { showError('Please use Chrome or Edge'); return; }
+    if (isListening) { recognition.stop(); return; }
 
-  function startWordHighlight(bubble, fullText) {
-    if (highlightTimer) clearInterval(highlightTimer);
-    const wordSpans = bubble.querySelectorAll('.word');
-    if (!wordSpans.length) return;
-    const words = fullText.trim().split(/\s+/);
-    const lines = splitIntoLines(words, 52);
-    const wordToLine = {};
-    lines.forEach((lineIndices) => {
-      lineIndices.forEach((wIdx, posInLine) => { wordToLine[wIdx] = { posInLine, lineIndices }; });
-    });
-    let idx = 0;
-    bubble.closest('.msg').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    highlightTimer = setInterval(() => {
-      wordSpans.forEach(w => w.classList.remove('active-word'));
-      if (idx < wordSpans.length) {
-        wordSpans[idx].classList.add('active-word');
-        const info = wordToLine[idx];
-        if (info) showZoomLine(info.lineIndices.map(i => words[i]), info.posInLine);
-        idx++;
-      } else { clearInterval(highlightTimer); wordSpans.forEach(w => w.classList.remove('active-word')); hideZoomPopup(); }
-    }, WORD_DELAY);
-  }
-
-  function saveToLocalStorage() {
-    if (history.length === 0) return;
-    const transcript = {
-      timestamp: new Date().toISOString(),
-      username: window.currentUsername,
-      messages: history
-    };
-    const transcripts = JSON.parse(localStorage.getItem('transcripts') || '[]');
-    transcripts.push(transcript);
-    localStorage.setItem('transcripts', JSON.stringify(transcripts));
-  }
-
-  function resetMicButtons() {
-    document.getElementById('interviewer-mic').className = '';
-    document.getElementById('candidate-mic').className = '';
-    showModeIndicator(null);
-  }
-
-  async function captureSystemAudio(mode) {
     try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: false,
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
-      });
-
-      currentMode = mode;
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: false, audio: { echoCancellation: false } });
+      isListening = true;
       capturedText = '';
       clearError();
+      document.getElementById('mic-btn').classList.add('listening');
+      setStatus('📡 Capturing system audio...');
 
       recognition = new SR();
       recognition.lang = 'en-GB';
-      recognition.interimResults = true;
       recognition.continuous = true;
-
-      recognition.onstart = () => {
-        isListening = true;
-        document.getElementById(mode === 'interviewer' ? 'interviewer-mic' : 'candidate-mic').className = 'listening';
-        showModeIndicator(mode);
-        setTranscript('', 'recording');
-        setStatus(' Capturing system audio  press again to stop');
-      };
+      recognition.interimResults = true;
 
       recognition.onresult = (e) => {
-        let interim = '', finalBit = '';
+        let interim = '';
         for (let i = e.resultIndex; i < e.results.length; i++) {
-          if (e.results[i].isFinal) finalBit += e.results[i][0].transcript;
+          if (e.results[i].isFinal) capturedText += e.results[i][0].transcript + ' ';
           else interim += e.results[i][0].transcript;
         }
-        if (finalBit) capturedText += finalBit;
-        setTranscript(capturedText + interim, 'recording');
+        document.getElementById('transcript-box').textContent = capturedText + interim;
       };
 
       recognition.onend = () => {
         isListening = false;
-        resetMicButtons();
-        stream.getTracks().forEach(track => track.stop());
-        const text = capturedText.trim();
-        if (text) {
-          setTranscript(text, mode === 'interviewer' ? 'active' : '');
-          if (mode === 'interviewer') { setStatus('Input captured  press GO for Voxera insight'); }
-          else { addMsg('candidate', text); capturedText = ''; setTranscript('', ''); setStatus('Response noted'); }
-        } else { setTranscript('', ''); setStatus('No audio detected'); }
-      };
-
-      recognition.onerror = (e) => {
-        isListening = false;
-        resetMicButtons();
-        stream.getTracks().forEach(track => track.stop());
-        setTranscript('', '');
-        showError('System audio access error: ' + e.error);
+        document.getElementById('mic-btn').classList.remove('listening');
+        stream.getTracks().forEach(t => t.stop());
+        if (capturedText.trim()) setStatus('Input captured — press GO');
+        else setStatus('No audio detected');
       };
 
       recognition.start();
-    } catch (error) {
-      showError('Screen share cancelled or unavailable');
+    } catch (e) {
+      isListening = false;
+      document.getElementById('mic-btn').classList.remove('listening');
+      showError('Screen share cancelled');
     }
   }
 
-  function toggleMic(mode) {
-    if (!SR) { showError('Please use Chrome or Edge browser'); return; }
-    if (isListening) { recognition.stop(); return; }
-    captureSystemAudio(mode);
-  }
-
   async function submitQuestion() {
-    if (isListening) { recognition.stop(); await new Promise(r => setTimeout(r, 500)); }
     const text = capturedText.trim();
-    if (!text) { showError('No input captured  press Interviewer first'); return; }
-    if (highlightTimer) { clearInterval(highlightTimer); hideZoomPopup(); }
-    addMsg('interviewer', text);
-    setTranscript('', ''); capturedText = '';
+    if (!text) { showError('No input — press Interviewer first'); return; }
+
+    addMsg('user', text);
+    document.getElementById('transcript-box').textContent = '';
+    capturedText = '';
     history.push({ role: 'user', content: text });
-    addMsg('ai', '', true); setStatus('Processing...');
+
+    setStatus('Processing...');
+    clearError();
+
     try {
-     const res = await fetch(API_URL, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: MODEL, messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history], max_tokens: 450 })
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: 'You are an expert interview coach. Provide concise, professional answers.' },
+            ...history
+          ],
+          max_tokens: 450
+        })
       });
+
       const data = await res.json();
-      if (data.error) { removeTyping(); showError('Service error'); history.pop(); }
+      if (data.error) showError('API error');
       else {
         const reply = data.choices[0].message.content;
+        addMsg('ai', reply);
         history.push({ role: 'assistant', content: reply });
-        removeTyping();
-        const bubble = addMsg('ai', reply);
-        clearError(); setStatus('System ready  press Interviewer to continue');
-        saveToLocalStorage();
-        if (isHighlightOn()) setTimeout(() => startWordHighlight(bubble, reply), 400);
+
+        const transcript = { timestamp: new Date().toISOString(), username: window.currentUsername, messages: history };
+        const all = JSON.parse(localStorage.getItem('transcripts') || '[]');
+        all.push(transcript);
+        localStorage.setItem('transcripts', JSON.stringify(all));
+
+        setStatus('Ready — press Interviewer to continue');
       }
-    } catch(e) { removeTyping(); showError('Connection error'); history.pop(); }
+    } catch (e) {
+      showError('Connection error');
+    }
   }
 </script>
+
 </body>
 </html>
