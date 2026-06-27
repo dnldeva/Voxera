@@ -38,6 +38,7 @@
   .toggle-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #f8f8f5; border-bottom: 1px solid #eee; }
   .toggle-label { font-size: 11px; color: #777; font-weight: 600; }
   .transcripts-link { font-size: 10px; color: #EF9F27; text-decoration: underline; cursor: pointer; }
+  .setup-note { font-size: 10px; color: #c0392b; font-weight: 600; }
   
   .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
   .message { display: flex; gap: 10px; }
@@ -111,14 +112,14 @@
     </div>
 
     <div class="toggle-bar">
-      <span class="toggle-label">📡 System Audio Only</span>
+      <span class="toggle-label">🔊 VB-Audio Cable (System Only)</span>
       <span class="transcripts-link" onclick="location.href='user-transcripts.html'">📋 My Transcripts</span>
     </div>
 
     <div class="messages" id="msgList">
       <div class="message ai">
         <div class="avatar ai">D2N</div>
-        <div class="bubble">Welcome! Press Record to capture interviewer audio, then ENTER to submit.</div>
+        <div class="bubble">Welcome! Press Record to capture interviewer audio only, then ENTER to submit.</div>
       </div>
     </div>
 
@@ -137,7 +138,7 @@
 
     <div class="footer">
       <span>© 2026 D2NL Midea</span>
-      <span>Voxera v5.0</span>
+      <span>Voxera v5.1 (VB-Audio)</span>
     </div>
   </div>
 </div>
@@ -153,6 +154,7 @@
   let isRec = false;
   let stream = null;
   let silenceTimer = null;
+  let vbAudioDeviceId = null;
 
   function login(e) {
     e.preventDefault();
@@ -168,6 +170,26 @@
     localStorage.setItem('user', u);
     document.getElementById('loginPage').classList.add('hidden');
     document.getElementById('appPage').classList.remove('hidden');
+    findVBAudioDevice();
+  }
+
+  async function findVBAudioDevice() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const vbDevice = devices.find(d => 
+        d.kind === 'audioinput' && 
+        (d.label.includes('VB-Audio') || d.label.includes('Cable') || d.label.includes('CABLE'))
+      );
+      
+      if (vbDevice) {
+        vbAudioDeviceId = vbDevice.deviceId;
+        status('✅ VB-Audio Cable detected');
+      } else {
+        status('⚠️ VB-Audio Cable not found - install it first');
+      }
+    } catch (e) {
+      console.log('Device enumeration error:', e);
+    }
   }
 
   function toggleRecord() {
@@ -184,26 +206,29 @@
       return;
     }
 
+    if (!vbAudioDeviceId) {
+      err('VB-Audio Cable not detected. Install it and refresh.');
+      return;
+    }
+
     isRec = true;
     text = '';
     clrErr();
     document.getElementById('recordBtn').classList.add('listening');
     document.getElementById('enterBtn').disabled = true;
-    status('📡 Requesting screen share for system audio...');
+    status('🔊 Recording from VB-Audio Cable...');
     show('', true);
 
     try {
-      // System audio ONLY via getDisplayMedia
-      stream = await navigator.mediaDevices.getDisplayMedia({ 
-        video: false,
+      // Record ONLY from VB-Audio Cable
+      stream = await navigator.mediaDevices.getUserMedia({ 
         audio: { 
+          deviceId: { exact: vbAudioDeviceId },
           echoCancellation: false, 
           noiseSuppression: false, 
           autoGainControl: false 
         } 
       });
-
-      status('📡 Recording system audio... (press button to stop)');
 
       rec = new SR();
       rec.lang = 'en-GB';
@@ -234,13 +259,7 @@
     } catch (e) {
       isRec = false;
       document.getElementById('recordBtn').classList.remove('listening');
-      if (e.name === 'NotAllowedError') {
-        err('Screen share cancelled');
-      } else if (e.name === 'NotSupportedError') {
-        err('Screen share not supported in your browser');
-      } else {
-        err('Error: ' + e.message);
-      }
+      err('Error accessing VB-Audio: ' + e.message);
     }
   }
 
@@ -349,6 +368,7 @@
       user = localStorage.getItem('user');
       document.getElementById('loginPage').classList.add('hidden');
       document.getElementById('appPage').classList.remove('hidden');
+      findVBAudioDevice();
     }
   });
 </script>
