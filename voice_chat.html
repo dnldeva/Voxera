@@ -142,9 +142,7 @@
     <div class="mode-indicator" id="mode-indicator"></div>
     <div class="controls-row">
       <div class="candidate-btn">
-        <button id="candidate-mic" onclick="toggleMic('candidate')" title="Record your response">
-          <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-6 9a6 6 0 0 0 12 0h2a8 8 0 0 1-7 7.93V21h-2v-3.07A8 8 0 0 1 4 10h2z"/></svg>
-        </button>
+      
         <span>Respond</span>
       </div>
       <div class="right-controls">
@@ -232,7 +230,39 @@ INSTRUCTIONS:
   let highlightTimer = null;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  function isHighlightOn() { return document.getElementById('highlight-toggle').checked; }
+  function isHighlightOn() { return document.getElementById('highlight-toggle').checked; }.
+  // Auto-save conversation every 10 minutes
+let autoSaveInterval = null;
+function startAutoSave() {
+  if (autoSaveInterval) clearInterval(autoSaveInterval);
+  autoSaveInterval = setInterval(saveConversation, 600000); // 10 minutes
+}
+
+async function saveConversation() {
+  if (history.length === 0) return;
+  
+  try {
+    const conversationData = {
+      timestamp: new Date().toISOString(),
+      username: window.currentUsername,
+      messages: history,
+      audioMode: 'system-audio'
+    };
+    
+    const response = await fetch('/api/save-conversation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(conversationData)
+    });
+    
+    if (response.ok) {
+      console.log('✅ Conversation auto-saved');
+    }
+  } catch (error) {
+    console.error('Save error:', error);
+  }
+}
+startAutoSave();
   function showError(m) { document.getElementById('error').textContent = m; }
   function clearError() { document.getElementById('error').textContent = ''; }
   function setStatus(m) { document.getElementById('status').textContent = m; }
