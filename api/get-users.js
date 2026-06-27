@@ -1,15 +1,27 @@
-﻿import fs from 'fs';
-import path from 'path';
-
-export default async function handler(req, res) {
-  try {
-    const filePath = path.join(process.cwd(), 'users.json');
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
-    const users = JSON.parse(fileContent);
-    
-    return res.status(200).json({ users });
-  } catch (error) {
-    console.error('Error reading users.json:', error);
-    return res.status(200).json({ users: [] });
-  }
+﻿export default async function handler(req, res) {
+  const users = [
+    {
+      "username": "alice",
+      "password": "password123",
+      "expiryHours": 24,
+      "createdAt": "2026-06-27T00:00:00.000Z",
+      "expiresAt": "2026-06-28T00:00:00.000Z"
+    },
+    {
+      "username": "bob",
+      "password": "securepass456",
+      "expiryHours": 24,
+      "createdAt": "2026-06-27T00:00:00.000Z",
+      "expiresAt": "2026-06-28T00:00:00.000Z"
+    },
+    {
+      "username": "charlie",
+      "password": "mypassword789",
+      "expiryHours": 24,
+      "createdAt": "2026-06-27T00:00:00.000Z",
+      "expiresAt": "2026-06-28T00:00:00.000Z"
+    }
+  ];
+  
+  return res.status(200).json({ users });
 }
