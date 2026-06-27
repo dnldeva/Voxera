@@ -68,7 +68,6 @@
   
   .btn-go { width: 78px; height: 78px; border-radius: 50%; border: none; background: #1a1a2e; color: #EF9F27; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(26,26,46,0.3); flex-shrink: 0; }
   .btn-go:hover { background: #2a2a4e; transform: scale(1.05); }
-  .btn-go:active { transform: scale(0.97); }
   .btn-go:disabled { opacity: 0.6; cursor: not-allowed; }
   
   .footer { padding: 10px 24px; background: #1a1a2e; font-size: 10px; color: rgba(255,255,255,0.4); display: flex; justify-content: space-between; }
@@ -76,29 +75,27 @@
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="loginPage">
   <div class="login-box">
     <div class="logo">D2N</div>
     <h1>Voxera</h1>
     <p>AI Interview Assistant</p>
     
-    <form id="loginForm" onsubmit="handleLogin(event)">
+    <form onsubmit="login(event)">
       <div class="form-group">
-        <label for="user">Username</label>
-        <input type="text" id="user" placeholder="alice" required autofocus />
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="alice" required autofocus />
       </div>
       <div class="form-group">
-        <label for="pass">Password</label>
-        <input type="password" id="pass" placeholder="password123" required />
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="password123" required />
       </div>
       <button type="submit" class="login-btn">Sign In</button>
-      <div class="error" id="loginErr"></div>
+      <div class="error" id="loginError"></div>
     </form>
   </div>
 </div>
 
-<!-- APP -->
 <div id="appPage" class="hidden">
   <div class="app-box">
     <div class="header">
@@ -114,233 +111,133 @@
     </div>
 
     <div class="toggle-bar">
-      <span class="toggle-label">📡 System Audio Mode</span>
-      <span class="transcripts-link" onclick="goTranscripts()">📋 My Transcripts</span>
+      <span class="toggle-label">🎤 Microphone Mode</span>
+      <span class="transcripts-link" onclick="location.href=`user-transcripts.html`">📋 My Transcripts</span>
     </div>
 
     <div class="messages" id="msgList">
       <div class="message ai">
         <div class="avatar ai">D2N</div>
-        <div class="bubble">Welcome! Press Record to capture system audio, then GO for an answer.</div>
+        <div class="bubble">Welcome! Press Record to speak, then GO for an answer.</div>
       </div>
     </div>
 
-    <div class="transcript-box" id="transcriptBox">Audio transcript will appear here...</div>
+    <div class="transcript-box" id="transcript">Audio transcript will appear here...</div>
 
     <div class="bottom">
       <div class="status-section">
-        <div class="status" id="statusText">Ready — press Record to begin</div>
-        <div class="error-text" id="errorText"></div>
+        <div class="status" id="status">Ready — press Record to begin</div>
+        <div class="error-text" id="errorMsg"></div>
       </div>
       <div class="buttons-section">
-        <button type="button" class="btn-record" id="recordBtn" onclick="clickRecord()">🎙️</button>
-        <button type="button" class="btn-go" id="goBtn" onclick="clickGO()">GO</button>
+        <button type="button" class="btn-record" id="recordBtn" onclick="record()">🎤</button>
+        <button type="button" class="btn-go" id="goBtn" onclick="send()">GO</button>
       </div>
     </div>
 
     <div class="footer">
       <span>© 2026 D2NL Midea</span>
-      <span>Voxera v3.6</span>
+      <span>Voxera v4.0</span>
     </div>
   </div>
 </div>
 
 <script>
-  const USERS = { 'alice': 'password123', 'bob': 'securepass456', 'charlie': 'mypassword789' };
-  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const users = { 'alice': 'password123', 'bob': 'securepass456', 'charlie': 'mypassword789' };
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  
+  let user = null;
+  let text = '';
+  let history = [];
+  let rec = null;
+  let isRec = false;
+  let stream = null;
 
-  let currentUser = null;
-  let conversation = [];
-  let isRecording = false;
-  let recordedText = '';
-  let mediaStream = null;
-  let recognizer = null;
-
-  // ===== LOGIN =====
-  function handleLogin(e) {
+  function login(e) {
     e.preventDefault();
-    const u = document.getElementById('user').value.trim();
-    const p = document.getElementById('pass').value.trim();
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
     
-    if (!u || !p) {
-      document.getElementById('loginErr').textContent = 'Enter credentials';
+    if (users[u] !== p) {
+      document.getElementById('loginError').textContent = 'Wrong username or password';
       return;
     }
-
-    if (USERS[u] !== p) {
-      document.getElementById('loginErr').textContent = 'Invalid credentials';
-      document.getElementById('pass').value = '';
-      return;
-    }
-
-    currentUser = u;
-    localStorage.setItem('currentUser', u);
+    
+    user = u;
+    localStorage.setItem('user', u);
     document.getElementById('loginPage').classList.add('hidden');
     document.getElementById('appPage').classList.remove('hidden');
   }
 
-  // ===== RECORD BUTTON =====
-  async function clickRecord() {
-    console.log('Record button clicked, isRecording:', isRecording);
-
-    if (isRecording) {
-      console.log('Already recording, stopping...');
-      stopRecord();
+  async function record() {
+    if (isRec) {
+      stopRec();
       return;
     }
 
-    if (!SpeechRec) {
-      showError('SpeechRecognition not available in this browser');
-      console.error('SpeechRecognition not available');
+    if (!SR) {
+      err('Browser not supported');
       return;
     }
 
-    isRecording = true;
-    recordedText = '';
-    clearError();
-
-    const btn = document.getElementById('recordBtn');
-    btn.classList.add('listening');
-    
-    setStatus('📡 Requesting screen share...');
-    console.log('Requesting getDisplayMedia...');
+    isRec = true;
+    text = '';
+    clrErr();
+    document.getElementById('recordBtn').classList.add('listening');
+    status('🎤 Listening... (click to stop)');
+    show('', true);
 
     try {
-      mediaStream = await navigator.mediaDevices.getDisplayMedia({
-        video: false,
-        audio: {
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      rec = new SR();
+      rec.lang = 'en-GB';
+      rec.continuous = true;
+      rec.interimResults = true;
+
+      rec.onresult = (e) => {
+        let tmp = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          if (e.results[i].isFinal) text += e.results[i][0].transcript + ' ';
+          else tmp += e.results[i][0].transcript;
         }
-      });
+        show(text + tmp, true);
+      };
 
-      console.log('✅ Got media stream');
-      setStatus('📡 Recording system audio... (click to stop)');
-      setTranscript('', true);
-      startSpeechRecognition();
-
-    } catch (error) {
-      console.error('Error getting display media:', error);
-      isRecording = false;
-      btn.classList.remove('listening');
-      
-      if (error.name === 'NotAllowedError') {
-        showError('Screen share was cancelled');
-      } else if (error.name === 'NotSupportedError') {
-        showError('Screen share not supported in this browser');
-      } else {
-        showError('Error: ' + error.message);
-      }
+      rec.onend = () => stopRec();
+      rec.onerror = (e) => { err('Mic error: ' + e.error); stopRec(); };
+      rec.start();
+    } catch (e) {
+      isRec = false;
+      document.getElementById('recordBtn').classList.remove('listening');
+      err('Mic access denied');
     }
   }
 
-  function startSpeechRecognition() {
-    console.log('Starting speech recognition...');
+  function stopRec() {
+    isRec = false;
+    if (rec) rec.stop();
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    document.getElementById('recordBtn').classList.remove('listening');
     
-    recognizer = new SpeechRec();
-    recognizer.lang = 'en-GB';
-    recognizer.continuous = true;
-    recognizer.interimResults = true;
-
-    recognizer.onstart = () => {
-      console.log('Speech recognition started');
-    };
-
-    recognizer.onresult = (event) => {
-      console.log('onresult:', event);
-      let interim = '';
-      
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        console.log('Transcript:', transcript, 'isFinal:', event.results[i].isFinal);
-        
-        if (event.results[i].isFinal) {
-          recordedText += transcript + ' ';
-        } else {
-          interim += transcript;
-        }
-      }
-      
-      setTranscript(recordedText + interim, true);
-    };
-
-    recognizer.onend = () => {
-      console.log('Speech recognition ended');
-      stopRecord();
-    };
-
-    recognizer.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
-      showError('Microphone error: ' + event.error);
-      stopRecord();
-    };
-
-    try {
-      recognizer.start();
-      console.log('Speech recognition started successfully');
-    } catch (error) {
-      console.error('Error starting recognition:', error);
-      showError('Could not start recording: ' + error.message);
-      stopRecord();
-    }
-  }
-
-  function stopRecord() {
-    console.log('Stopping record, recordedText length:', recordedText.length);
-    
-    isRecording = false;
-    
-    if (recognizer) {
-      recognizer.stop();
-    }
-    
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(track => {
-        console.log('Stopping track:', track.kind);
-        track.stop();
-      });
-      mediaStream = null;
-    }
-
-    const btn = document.getElementById('recordBtn');
-    btn.classList.remove('listening');
-
-    if (recordedText.trim().length > 0) {
-      console.log('Got text:', recordedText.trim());
-      setTranscript(recordedText.trim(), false);
-      setStatus('✅ Input captured — press GO to send');
+    if (text.trim()) {
+      show(text.trim(), false);
+      status('Ready — press GO');
     } else {
-      console.log('No text captured');
-      setTranscript('', false);
-      setStatus('No speech detected — try again');
+      show('', false);
+      status('No audio detected');
     }
   }
 
-  // ===== GO BUTTON =====
-  function clickGO() {
-    console.log('GO button clicked, recordedText:', recordedText);
-    
-    const text = recordedText.trim();
-    
-    if (!text || text.length === 0) {
-      showError('No input — press Record first');
-      return;
-    }
+  async function send() {
+    const msg = text.trim();
+    if (!msg) { err('Record first'); return; }
 
-    sendToAPI(text);
-  }
-
-  async function sendToAPI(text) {
-    console.log('Sending to API:', text);
-    
-    addMsg('user', text);
-    recordedText = '';
-    setTranscript('', false);
-    conversation.push({ role: 'user', content: text });
-
-    setStatus('⏳ Waiting for response...');
-    clearError();
+    add('user', msg);
+    text = '';
+    show('', false);
+    history.push({ role: 'user', content: msg });
+    status('⏳ Waiting...');
+    clrErr();
     document.getElementById('goBtn').disabled = true;
 
     try {
@@ -349,101 +246,55 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
-          messages: [
-            { role: 'system', content: 'You are an expert interview coach. Answer in 2-3 sentences.' },
-            ...conversation
-          ],
+          messages: [{ role: 'system', content: 'Expert interview coach. Answer in 2-3 sentences.' }, ...history],
           max_tokens: 300
         })
       });
 
-      console.log('API Response status:', res.status);
-
-      if (!res.ok) {
-        showError(`API error ${res.status}`);
-        conversation.pop();
-        document.getElementById('goBtn').disabled = false;
-        return;
-      }
-
+      if (!res.ok) { err('API error'); history.pop(); document.getElementById('goBtn').disabled = false; return; }
+      
       const data = await res.json();
-      console.log('API Response:', data);
-
-      if (data.error) {
-        showError('API Error: ' + data.error);
-        conversation.pop();
-        document.getElementById('goBtn').disabled = false;
-        return;
-      }
-
+      if (data.error) { err('API error'); history.pop(); document.getElementById('goBtn').disabled = false; return; }
+      
       const reply = data.choices[0].message.content;
-      addMsg('ai', reply);
-      conversation.push({ role: 'assistant', content: reply });
-
-      saveToStorage();
-      setStatus('Ready — press Record to continue');
+      add('ai', reply);
+      history.push({ role: 'assistant', content: reply });
+      
+      const t = { timestamp: new Date().toISOString(), username: user, conversations: history };
+      const all = JSON.parse(localStorage.getItem('transcripts') || '[]');
+      all.push(t);
+      localStorage.setItem('transcripts', JSON.stringify(all));
+      
+      status('Ready — press Record to continue');
       document.getElementById('goBtn').disabled = false;
-
-    } catch (err) {
-      console.error('Fetch error:', err);
-      showError('Connection error: ' + err.message);
-      conversation.pop();
+    } catch (e) {
+      err('Error: ' + e.message);
+      history.pop();
       document.getElementById('goBtn').disabled = false;
     }
   }
 
-  // ===== UI HELPERS =====
-  function addMsg(role, text) {
-    const cont = document.getElementById('msgList');
+  function add(role, txt) {
     const div = document.createElement('div');
     div.className = 'message ' + role;
-    const av = role === 'ai' ? 'D2N' : 'Q';
-    const avClass = role === 'ai' ? 'ai' : 'user';
-    div.innerHTML = `<div class="avatar ${avClass}">${av}</div><div class="bubble">${text}</div>`;
-    cont.appendChild(div);
+    div.innerHTML = `<div class="avatar ${role === 'ai' ? 'ai' : 'user'}">${role === 'ai' ? 'D2N' : 'Q'}</div><div class="bubble">${txt}</div>`;
+    document.getElementById('msgList').appendChild(div);
     div.scrollIntoView({ behavior: 'smooth' });
   }
 
-  function setTranscript(text, rec) {
-    const box = document.getElementById('transcriptBox');
-    box.textContent = text || 'Audio transcript will appear here...';
+  function show(t, rec) {
+    const box = document.getElementById('transcript');
+    box.textContent = t || 'Audio transcript will appear here...';
     box.className = rec ? 'transcript-box recording' : 'transcript-box';
   }
 
-  function setStatus(text) {
-    document.getElementById('statusText').textContent = text;
-  }
+  function status(t) { document.getElementById('status').textContent = t; }
+  function err(t) { document.getElementById('errorMsg').textContent = t; }
+  function clrErr() { document.getElementById('errorMsg').textContent = ''; }
 
-  function showError(text) {
-    document.getElementById('errorText').textContent = text;
-    console.error('Error:', text);
-  }
-
-  function clearError() {
-    document.getElementById('errorText').textContent = '';
-  }
-
-  function goTranscripts() {
-    window.location.href = 'user-transcripts.html';
-  }
-
-  // ===== STORAGE =====
-  function saveToStorage() {
-    const t = {
-      timestamp: new Date().toISOString(),
-      username: currentUser,
-      conversations: conversation
-    };
-    const all = JSON.parse(localStorage.getItem('transcripts') || '[]');
-    all.push(t);
-    localStorage.setItem('transcripts', JSON.stringify(all));
-  }
-
-  // ===== INIT =====
   window.addEventListener('load', () => {
-    console.log('Page loaded');
-    if (localStorage.getItem('currentUser')) {
-      currentUser = localStorage.getItem('currentUser');
+    if (localStorage.getItem('user')) {
+      user = localStorage.getItem('user');
       document.getElementById('loginPage').classList.add('hidden');
       document.getElementById('appPage').classList.remove('hidden');
     }
