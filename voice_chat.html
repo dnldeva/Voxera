@@ -118,7 +118,7 @@
     <div class="messages" id="msgList">
       <div class="message ai">
         <div class="avatar ai">D2N</div>
-        <div class="bubble">Welcome! Press Record to speak, then GO for an answer.</div>
+        <div class="bubble">Welcome! Press Record to speak, then GO to submit.</div>
       </div>
     </div>
 
@@ -131,13 +131,13 @@
       </div>
       <div class="buttons-section">
         <button type="button" class="btn-record" id="recordBtn" onclick="record()">🎤</button>
-        <button type="button" class="btn-go" id="goBtn" onclick="send()">GO</button>
+        <button type="button" class="btn-go" id="goBtn" onclick="sendNow()">GO</button>
       </div>
     </div>
 
     <div class="footer">
       <span>© 2026 D2NL Midea</span>
-      <span>Voxera v4.3</span>
+      <span>Voxera v4.4</span>
     </div>
   </div>
 </div>
@@ -170,11 +170,6 @@
   }
 
   async function record() {
-    if (isRec) {
-      stopRec();
-      return;
-    }
-
     if (!SR) {
       err('Browser not supported');
       return;
@@ -184,7 +179,7 @@
     text = '';
     clrErr();
     document.getElementById('recordBtn').classList.add('listening');
-    status('🎤 Listening... (click to stop)');
+    status('🎤 Listening... (press GO to submit)');
     show('', true);
 
     try {
@@ -204,7 +199,10 @@
         show(text + tmp, true);
       };
 
-      rec.onend = () => stopRec();
+      rec.onend = () => {
+        // Don't auto-stop, wait for GO button
+      };
+
       rec.onerror = (e) => { err('Error: ' + e.error); stopRec(); };
       rec.start();
     } catch (e) {
@@ -219,17 +217,14 @@
     if (rec) rec.stop();
     if (stream) stream.getTracks().forEach(t => t.stop());
     document.getElementById('recordBtn').classList.remove('listening');
-    
-    if (text.trim()) {
-      show(text.trim(), false);
-      status('Ready — press GO');
-    } else {
-      show('', false);
-      status('No audio detected');
-    }
   }
 
-  async function send() {
+  async function sendNow() {
+    // If still recording, stop it first
+    if (isRec) {
+      stopRec();
+    }
+
     const msg = text.trim();
     if (!msg) { err('Record first'); return; }
 
