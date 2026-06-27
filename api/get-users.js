@@ -1,25 +1,16 @@
-import fs from 'fs';
+﻿import fs from 'fs';
 import path from 'path';
 
 export default async function handler(req, res) {
   try {
-    const usersDir = path.join(process.cwd(), 'users');
+    const usersPath = path.join(process.cwd(), 'users.json');
     
-    if (!fs.existsSync(usersDir)) {
+    if (!fs.existsSync(usersPath)) {
       return res.status(200).json({ users: [] });
     }
 
-    const files = fs.readdirSync(usersDir);
-    const users = [];
-
-    files.forEach(file => {
-      if (file.endsWith('.json')) {
-        const filepath = path.join(usersDir, file);
-        const content = fs.readFileSync(filepath, 'utf-8');
-        const user = JSON.parse(content);
-        users.push(user);
-      }
-    });
+    const content = fs.readFileSync(usersPath, 'utf-8');
+    const users = JSON.parse(content);
 
     res.status(200).json({ users });
   } catch (error) {

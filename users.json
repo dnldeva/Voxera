@@ -1,0 +1,16 @@
+﻿[
+  {
+    "username": "alice",
+    "password": "password123",
+    "expiryHours": 24,
+    "createdAt": "2026-06-27T00:00:00.000Z",
+    "expiresAt": "2026-06-28T00:00:00.000Z"
+  },
+  {
+    "username": "bob",
+    "password": "securepass456",
+    "expiryHours": 24,
+    "createdAt": "2026-06-27T00:00:00.000Z",
+    "expiresAt": "2026-06-28T00:00:00.000Z"
+  }
+]
