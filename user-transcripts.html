@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Voxera — My Transcripts</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+      background: #f0f0ec; 
+      padding: 24px;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    .header { 
+      background: #1a1a2e; 
+      color: #fff; 
+      padding: 24px; 
+      border-radius: 12px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 { font-size: 24px; }
+    .back-btn { 
+      background: #EF9F27; 
+      color: #1a1a2e; 
+      border: none; 
+      padding: 10px 20px; 
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .back-btn:hover { background: #f0b03c; }
+    .transcripts-list { display: flex; flex-direction: column; gap: 12px; }
+    .transcript-item { 
+      background: #fff; 
+      padding: 16px; 
+      border-radius: 10px;
+      border-left: 4px solid #EF9F27;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .transcript-item:hover { 
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      transform: translateY(-2px);
+    }
+    .transcript-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .date { font-weight: 700; color: #1a1a2e; font-size: 16px; }
+    .audio-mode { 
+      font-size: 11px; 
+      padding: 4px 8px; 
+      border-radius: 4px;
+      background: rgba(239, 159, 39, 0.15);
+      color: #EF9F27;
+      font-weight: 600;
+    }
+    .details { display: flex; gap: 16px; font-size: 13px; color: #777; margin-top: 8px; }
+    .action-buttons { display: flex; gap: 10px; margin-top: 12px; }
+    .view-btn, .download-btn { 
+      padding: 8px 16px; 
+      border: none; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-size: 12px; 
+      font-weight: 600;
+    }
+    .view-btn { background: #1a1a2e; color: #fff; }
+    .view-btn:hover { background: #2a2a4e; }
+    .download-btn { background: #EF9F27; color: #1a1a2e; }
+    .download-btn:hover { background: #f0b03c; }
+    .empty { 
+      text-align: center; 
+      padding: 40px; 
+      color: #999;
+      background: #fff;
+      border-radius: 10px;
+    }
+    .modal { 
+      display: none; 
+      position: fixed; 
+      top: 0; left: 0; 
+      right: 0; bottom: 0; 
+      background: rgba(0,0,0,0.5); 
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active { display: flex; }
+    .modal-content { 
+      background: #fff; 
+      border-radius: 12px; 
+      max-width: 700px; 
+      max-height: 80vh; 
+      overflow-y: auto;
+      padding: 24px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+    .modal-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #eee;
+    }
+    .close-btn { 
+      background: none; 
+      border: none; 
+      font-size: 24px; 
+      cursor: pointer;
+      color: #999;
+    }
+    .close-btn:hover { color: #1a1a2e; }
+    .conversation-detail { display: flex; flex-direction: column; gap: 12px; }
+    .msg-item { 
+      padding: 12px; 
+      border-radius: 8px; 
+      margin-bottom: 8px;
+    }
+    .msg-item.user { 
+      background: #f0f0f8; 
+      border-left: 3px solid #1a1a2e;
+    }
+    .msg-item.assistant { 
+      background: #FFF8EC; 
+      border-left: 3px solid #EF9F27;
+    }
+    .msg-role { 
+      font-size: 10px; 
+      font-weight: 700; 
+      text-transform: uppercase; 
+      color: #999;
+      margin-bottom: 4px;
+    }
+    .msg-content { 
+      font-size: 14px; 
+      line-height: 1.5; 
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>📋 My Transcripts</h1>
+    <button class="back-btn" onclick="window.location.href='voice_chat.html'">← Back to App</button>
+  </div>
+
+  <div class="transcripts-list" id="transcripts-list">
+    <div class="empty">Loading your transcripts...</div>
+  </div>
+</div>
+
+<!-- Modal for viewing transcript -->
+<div class="modal" id="transcript-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modal-title">Transcript</h2>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="conversation-detail" id="conversation-detail"></div>
+  </div>
+</div>
+
+<script>
+  async function loadMyTranscripts() {
+    try {
+      const response = await fetch('/api/get-conversations');
+      const data = await response.json();
+      const currentUser = localStorage.getItem('currentUser');
+
+      const list = document.getElementById('transcripts-list');
+      
+      if (!data.conversations || data.conversations.length === 0) {
+        list.innerHTML = '<div class="empty">No transcripts yet. Start a conversation!</div>';
+        return;
+      }
+
+      // Filter only current user's transcripts
+      const myTranscripts = data.conversations.filter(conv => conv.username === currentUser);
+
+      if (myTranscripts.length === 0) {
+        list.innerHTML = '<div class="empty">No transcripts for your account</div>';
+        return;
+      }
+
+      list.innerHTML = myTranscripts.map(conv => `
+        <div class="transcript-item">
+          <div class="transcript-header">
+            <span class="date">${new Date(conv.date).toLocaleDateString()} - ${new Date(conv.date).toLocaleTimeString()}</span>
+            <span class="audio-mode">${conv.audioMode === 'system-audio' ? '📡 System Audio' : '🎤 Microphone'}</span>
+          </div>
+          <div class="details">
+            <span>${conv.messageCount} messages</span>
+            <span>Saved: ${new Date(conv.lastSaved).toLocaleString()}</span>
+          </div>
+          <div class="action-buttons">
+            <button class="view-btn" onclick="viewTranscript('${conv.filename}')">👁️ View</button>
+            <button class="download-btn" onclick="downloadTranscript('${conv.filename}')">⬇️ Download</button>
+          </div>
+        </div>
+      `).join('');
+    } catch (error) {
+      console.error('Error loading transcripts:', error);
+      document.getElementById('transcripts-list').innerHTML = '<div class="empty">Error loading transcripts</div>';
+    }
+  }
+
+  async function viewTranscript(filename) {
+    try {
+      const response = await fetch(`/api/get-conversation?filename=${encodeURIComponent(filename)}`);
+      const data = await response.json();
+
+      const detail = document.getElementById('conversation-detail');
+      detail.innerHTML = data.messages.map(msg => `
+        <div class="msg-item ${msg.role}">
+          <div class="msg-role">${msg.role === 'user' ? 'You' : 'Voxera AI'}</div>
+          <div class="msg-content">${msg.content}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('modal-title').textContent = `Transcript - ${new Date(data.timestamp).toLocaleDateString()}`;
+      document.getElementById('transcript-modal').classList.add('active');
+    } catch (error) {
+      console.error('Error loading transcript:', error);
+      alert('Failed to load transcript');
+    }
+  }
+
+  function closeModal() {
+    document.getElementById('transcript-modal').classList.remove('active');
+  }
+
+  async function downloadTranscript(filename) {
+    try {
+      const response = await fetch(`/api/download-transcript?filename=${encodeURIComponent(filename)}`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+    } catch (error) {
+      console.error('Error downloading transcript:', error);
+      alert('Failed to download transcript');
+    }
+  }
+
+  // Load transcripts when page loads
+  loadMyTranscripts();
+</script>
+
+</body>
+</html>

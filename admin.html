@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Voxera — Admin Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ec; }
+    .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .login-box { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); width: 100%; max-width: 400px; }
+    .login-header { text-align: center; margin-bottom: 30px; }
+    .logo-mark { width: 48px; height: 48px; border-radius: 8px; background: #94FF33; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #1a1a1a; margin: 0 auto 16px; }
+    .login-header h1 { font-size: 24px; color: #1a1a2e; margin-bottom: 8px; }
+    .login-header p { color: #999; font-size: 14px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #777; margin-bottom: 6px; text-transform: uppercase; }
+    .form-group input { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; }
+    .form-group input:focus { outline: none; border-color: #EF9F27; box-shadow: 0 0 0 3px rgba(239,159,39,0.1); }
+    .login-btn { width: 100%; padding: 12px; background: #1a1a2e; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 20px; }
+    .login-btn:hover { background: #2a2a4e; }
+    .error { color: #c0392b; font-size: 13px; margin-top: 12px; text-align: center; }
+    .dashboard { display: none; }
+    .dashboard.active { display: block; }
+    .dashboard-header { background: #1a1a2e; color: #fff; padding: 24px; display: flex; justify-content: space-between; align-items: center; }
+    .dashboard-header h1 { font-size: 24px; }
+    .logout-btn { background: #EF9F27; color: #1a1a2e; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .logout-btn:hover { background: #f0b03c; }
+    .dashboard-content { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .tabs { display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid #eee; }
+    .tab-btn { background: none; border: none; padding: 12px 20px; font-size: 14px; font-weight: 600; color: #999; cursor: pointer; border-bottom: 3px solid transparent; }
+    .tab-btn.active { color: #1a1a2e; border-bottom-color: #EF9F27; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .users-list { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .users-table { width: 100%; border-collapse: collapse; }
+    .users-table th { background: #f8f8f5; padding: 16px; text-align: left; font-weight: 600; color: #1a1a2e; border-bottom: 2px solid #eee; }
+    .users-table td { padding: 16px; border-bottom: 1px solid #eee; }
+    .users-table tr:hover { background: #f9f9f6; }
+    .action-btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
+    .edit-btn { background: #EF9F27; color: #1a1a2e; }
+    .delete-btn { background: #E24B4A; color: #fff; margin-left: 6px; }
+    .add-user-btn { background: #1a1a2e; color: #fff; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-bottom: 20px; }
+    .add-user-btn:hover { background: #2a2a4e; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-row.full { grid-template-columns: 1fr; }
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal.active { display: flex; }
+    .modal-content { background: #fff; border-radius: 12px; padding: 32px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .modal-header h2 { font-size: 20px; color: #1a1a2e; }
+    .close-modal { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+    .modal-btn { width: 100%; padding: 12px; background: #1a1a2e; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 20px; }
+    .modal-btn:hover { background: #2a2a4e; }
+    .success { background: #e8f5e9; color: #1b5e20; padding: 12px; border-radius: 6px; margin-bottom: 16px; }
+    .empty { text-align: center; padding: 40px; color: #999; }
+  </style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div class="login-container" id="login-screen">
+  <div class="login-box">
+    <div class="login-header">
+      <div class="logo-mark">D2N</div>
+      <h1>Admin Panel</h1>
+      <p>Voxera Administration</p>
+    </div>
+    <form onsubmit="handleAdminLogin(event)">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="admin-username" placeholder="Enter admin username" required />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="admin-password" placeholder="Enter admin password" required />
+      </div>
+      <button type="submit" class="login-btn">Sign In</button>
+      <div class="error" id="login-error"></div>
+    </form>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div class="dashboard" id="dashboard">
+  <div class="dashboard-header">
+    <h1>🔐 Admin Dashboard</h1>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="dashboard-content">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('users')">👥 Manage Users</button>
+      <button class="tab-btn" onclick="switchTab('transcripts')">📋 Download Transcripts</button>
+    </div>
+
+    <!-- Users Tab -->
+    <div class="tab-content active" id="users-tab">
+      <button class="add-user-btn" onclick="openAddUserModal()">+ Add New User</button>
+      <div class="users-list">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Password</th>
+              <th>Expiry Hours</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr><td colspan="5" class="empty">Loading users...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Transcripts Tab -->
+    <div class="tab-content" id="transcripts-tab">
+      <div class="users-list">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Date</th>
+              <th>Messages</th>
+              <th>Audio Mode</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="transcripts-tbody">
+            <tr><td colspan="5" class="empty">Loading transcripts...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit User Modal -->
+<div class="modal" id="user-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modal-title">Add New User</h2>
+      <button class="close-modal" onclick="closeUserModal()">×</button>
+    </div>
+    <form onsubmit="handleSaveUser(event)">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="modal-username" placeholder="Enter username" required />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="text" id="modal-password" placeholder="Enter password" required />
+      </div>
+      <div class="form-group">
+        <label>Password Expiry Hours</label>
+        <select id="modal-expiry" required>
+          <option value="">Select expiry hours</option>
+          <option value="2">2 hours</option>
+          <option value="5">5 hours</option>
+          <option value="8">8 hours</option>
+          <option value="24">24 hours</option>
+        </select>
+      </div>
+      <button type="submit" class="modal-btn">Save User</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const ADMIN_USERNAME = 'D2nlmedia';
+  const ADMIN_PASSWORD = 'TempPwd@2026';
+
+  function handleAdminLogin(event) {
+    event.preventDefault();
+    const username = document.getElementById('admin-username').value;
+    const password = document.getElementById('admin-password').value;
+
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      sessionStorage.setItem('adminLoggedIn', 'true');
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard').classList.add('active');
+      loadUsers();
+      loadTranscripts();
+    } else {
+      document.getElementById('login-error').textContent = 'Invalid username or password';
+    }
+  }
+
+  function logout() {
+    sessionStorage.removeItem('adminLoggedIn');
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('dashboard').classList.remove('active');
+    document.getElementById('admin-username').value = '';
+    document.getElementById('admin-password').value = '';
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(tab + '-tab').classList.add('active');
+  }
+
+  async function loadUsers() {
+    try {
+      const response = await fetch('/api/get-users');
+      const data = await response.json();
+      const tbody = document.getElementById('users-tbody');
+
+      if (!data.users || data.users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty">No users found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.users.map(user => `
+        <tr>
+          <td><strong>${user.username}</strong></td>
+          <td>${user.password}</td>
+          <td>${user.expiryHours} hours</td>
+          <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+          <td>
+            <button class="action-btn edit-btn" onclick="editUser('${user.username}', '${user.password}', '${user.expiryHours}')">Edit</button>
+            <button class="action-btn delete-btn" onclick="deleteUser('${user.username}')">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    } catch (error) {
+      console.error('Error loading users:', error);
+    }
+  }
+
+  async function loadTranscripts() {
+    try {
+      const response = await fetch('/api/get-conversations');
+      const data = await response.json();
+      const tbody = document.getElementById('transcripts-tbody');
+
+      if (!data.conversations || data.conversations.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty">No transcripts found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.conversations.map(conv => `
+        <tr>
+          <td><strong>${conv.username}</strong></td>
+          <td>${new Date(conv.date).toLocaleDateString()}</td>
+          <td>${conv.messageCount}</td>
+          <td>${conv.audioMode === 'system-audio' ? '📡 System' : '🎤 Microphone'}</td>
+          <td>
+            <button class="action-btn edit-btn" onclick="downloadTranscript('${conv.filename}', '${conv.username}')">Download</button>
+          </td>
+        </tr>
+      `).join('');
+    } catch (error) {
+      console.error('Error loading transcripts:', error);
+    }
+  }
+
+  function openAddUserModal() {
+    document.getElementById('modal-title').textContent = 'Add New User';
+    document.getElementById('modal-username').value = '';
+    document.getElementById('modal-password').value = '';
+    document.getElementById('modal-expiry').value = '';
+    document.getElementById('user-modal').classList.add('active');
+  }
+
+  function editUser(username, password, expiryHours) {
+    document.getElementById('modal-title').textContent = 'Edit User';
+    document.getElementById('modal-username').value = username;
+    document.getElementById('modal-username').disabled = true;
+    document.getElementById('modal-password').value = password;
+    document.getElementById('modal-expiry').value = expiryHours;
+    document.getElementById('user-modal').classList.add('active');
+  }
+
+  function closeUserModal() {
+    document.getElementById('user-modal').classList.remove('active');
+    document.getElementById('modal-username').disabled = false;
+  }
+
+  async function handleSaveUser(event) {
+    event.preventDefault();
+    const username = document.getElementById('modal-username').value;
+    const password = document.getElementById('modal-password').value;
+    const expiryHours = document.getElementById('modal-expiry').value;
+
+    try {
+      const response = await fetch('/api/update-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, expiryHours: parseInt(expiryHours) })
+      });
+
+      if (response.ok) {
+        closeUserModal();
+        loadUsers();
+      }
+    } catch (error) {
+      console.error('Error saving user:', error);
+    }
+  }
+
+  async function deleteUser(username) {
+    if (confirm(`Delete user "${username}"?`)) {
+      try {
+        const response = await fetch('/api/update-users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, action: 'delete' })
+        });
+
+        if (response.ok) {
+          loadUsers();
+        }
+      } catch (error) {
+        console.error('Error deleting user:', error);
+      }
+    }
+  }
+
+  async function downloadTranscript(filename, username) {
+    try {
+      const response = await fetch(`/api/download-transcript?filename=${encodeURIComponent(filename)}`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${username}_transcript_${filename}.json`;
+      a.click();
+    } catch (error) {
+      console.error('Error downloading transcript:', error);
+      alert('Failed to download transcript');
+    }
+  }
+
+  // Check if already logged in
+  if (!sessionStorage.getItem('adminLoggedIn')) {
+    document.getElementById('login-screen').style.display = 'flex';
+  } else {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').classList.add('active');
+    loadUsers();
+    loadTranscripts();
+  }
+</script>
+
+<style>
+  select {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  select:focus {
+    outline: none;
+    border-color: #EF9F27;
+    box-shadow: 0 0 0 3px rgba(239,159,39,0.1);
+  }
+</style>
+
+</body>
+</html>
