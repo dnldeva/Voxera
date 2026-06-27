@@ -130,14 +130,14 @@
         <div class="error-text" id="errorMsg"></div>
       </div>
       <div class="buttons-section">
-        <button type="button" class="btn-record" id="recordBtn" onclick="record()">🎤</button>
-        <button type="button" class="btn-go" id="goBtn" onclick="sendNow()">GO</button>
+        <button type="button" class="btn-record" id="recordBtn" onclick="toggleRecord()">🎤</button>
+        <button type="button" class="btn-go" id="goBtn" onclick="submitNow()" disabled>GO</button>
       </div>
     </div>
 
     <div class="footer">
       <span>© 2026 D2NL Midea</span>
-      <span>Voxera v4.4</span>
+      <span>Voxera v4.5</span>
     </div>
   </div>
 </div>
@@ -152,6 +152,7 @@
   let rec = null;
   let isRec = false;
   let stream = null;
+  let silenceTimer = null;
 
   function login(e) {
     e.preventDefault();
@@ -169,7 +170,15 @@
     document.getElementById('appPage').classList.remove('hidden');
   }
 
-  async function record() {
+  function toggleRecord() {
+    if (isRec) {
+      stopRec();
+    } else {
+      startRec();
+    }
+  }
+
+  async function startRec() {
     if (!SR) {
       err('Browser not supported');
       return;
@@ -179,7 +188,8 @@
     text = '';
     clrErr();
     document.getElementById('recordBtn').classList.add('listening');
-    status('🎤 Listening... (press GO to submit)');
+    document.getElementById('goBtn').disabled = true;
+    status('🎤 Listening... (press button to stop)');
     show('', true);
 
     try {
@@ -191,16 +201,19 @@
       rec.interimResults = true;
 
       rec.onresult = (e) => {
+        clearTimeout(silenceTimer);
+        
         let tmp = '';
         for (let i = e.resultIndex; i < e.results.length; i++) {
           if (e.results[i].isFinal) text += e.results[i][0].transcript + ' ';
           else tmp += e.results[i][0].transcript;
         }
         show(text + tmp, true);
-      };
 
-      rec.onend = () => {
-        // Don't auto-stop, wait for GO button
+        // Auto-stop after 2 seconds of silence
+        silenceTimer = setTimeout(() => {
+          stopRec();
+        }, 2000);
       };
 
       rec.onerror = (e) => { err('Error: ' + e.error); stopRec(); };
@@ -213,18 +226,24 @@
   }
 
   function stopRec() {
+    clearTimeout(silenceTimer);
     isRec = false;
     if (rec) rec.stop();
     if (stream) stream.getTracks().forEach(t => t.stop());
     document.getElementById('recordBtn').classList.remove('listening');
+    
+    if (text.trim()) {
+      show(text.trim(), false);
+      status('Ready — press GO to submit');
+      document.getElementById('goBtn').disabled = false;
+    } else {
+      show('', false);
+      status('No audio detected');
+      document.getElementById('goBtn').disabled = true;
+    }
   }
 
-  async function sendNow() {
-    // If still recording, stop it first
-    if (isRec) {
-      stopRec();
-    }
-
+  async function submitNow() {
     const msg = text.trim();
     if (!msg) { err('Record first'); return; }
 
@@ -234,6 +253,7 @@
     history.push({ role: 'user', content: msg });
     status('⏳ Waiting...');
     clrErr();
+    document.getElementById('recordBtn').disabled = true;
     document.getElementById('goBtn').disabled = true;
 
     try {
@@ -247,10 +267,10 @@
         })
       });
 
-      if (!res.ok) { err('API error'); history.pop(); document.getElementById('goBtn').disabled = false; return; }
+      if (!res.ok) { err('API error'); history.pop(); document.getElementById('recordBtn').disabled = false; return; }
       
       const data = await res.json();
-      if (data.error) { err('API error'); history.pop(); document.getElementById('goBtn').disabled = false; return; }
+      if (data.error) { err('API error'); history.pop(); document.getElementById('recordBtn').disabled = false; return; }
       
       const reply = data.choices[0].message.content;
       add('ai', reply);
@@ -262,11 +282,12 @@
       localStorage.setItem('transcripts', JSON.stringify(all));
       
       status('Ready — press Record to continue');
-      document.getElementById('goBtn').disabled = false;
+      document.getElementById('recordBtn').disabled = false;
+      document.getElementById('goBtn').disabled = true;
     } catch (e) {
       err('Error: ' + e.message);
       history.pop();
-      document.getElementById('goBtn').disabled = false;
+      document.getElementById('recordBtn').disabled = false;
     }
   }
 
