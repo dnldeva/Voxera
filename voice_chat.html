@@ -24,7 +24,7 @@
   .error { color: #c0392b; font-size: 12px; text-align: center; margin-top: 12px; min-height: 16px; }
   
   #appPage { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-  .app-box { width: 100%; max-width: 650px; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; }
+  .app-box { width: 100%; max-width: 650px; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; height: 600px; }
   
   .header { padding: 16px 24px; background: #1a1a2e; display: flex; align-items: center; gap: 12px; }
   .header-logo { width: 36px; height: 36px; background: #94FF33; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #1a1a1a; font-size: 12px; }
@@ -39,7 +39,7 @@
   .toggle-label { font-size: 11px; color: #777; font-weight: 600; }
   .transcripts-link { font-size: 10px; color: #EF9F27; text-decoration: underline; cursor: pointer; }
   
-  .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; max-height: 350px; }
+  .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
   .message { display: flex; gap: 10px; }
   .message.user { flex-direction: row-reverse; }
   .message.ai { flex-direction: row; }
@@ -53,10 +53,13 @@
   .transcript-box { margin: 0 16px 10px 16px; min-height: 50px; padding: 10px 14px; background: #f8f8f5; border-radius: 8px; border: 1.5px dashed #ddd; color: #999; font-size: 13px; display: flex; align-items: center; }
   .transcript-box.recording { background: #fff8f8; border-color: #E24B4A; color: #333; }
   
-  .bottom { padding: 14px 20px; border-top: 1px solid #eee; background: #fafafa; }
-  .bottom-content { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; margin-top: 12px; }
-  .bottom-left { display: flex; flex-direction: column; flex: 1; }
-  .bottom-right { display: flex; gap: 14px; align-items: center; }
+  .bottom { padding: 0; flex-shrink: 0; display: flex; flex-direction: column; border-top: 1px solid #eee; background: #fafafa; height: auto; }
+  
+  .status-section { padding: 10px 20px; border-bottom: 1px solid #eee; }
+  .status { font-size: 12px; color: #999; min-height: 16px; }
+  .error-text { font-size: 11px; color: #c0392b; min-height: 14px; margin-top: 4px; }
+  
+  .buttons-section { padding: 12px 20px 16px 20px; display: flex; justify-content: flex-end; gap: 12px; }
   
   .btn-record { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #1a1a2e; background: white; cursor: pointer; font-size: 26px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
   .btn-record:hover { background: #1a1a2e; color: #EF9F27; }
@@ -67,9 +70,6 @@
   .btn-go:hover { background: #2a2a4e; transform: scale(1.05); }
   .btn-go:active { transform: scale(0.97); }
   .btn-go:disabled { opacity: 0.6; cursor: not-allowed; }
-  
-  .status { font-size: 12px; color: #999; min-height: 16px; }
-  .error-text { font-size: 11px; color: #c0392b; min-height: 14px; margin-top: 4px; }
   
   .footer { padding: 10px 24px; background: #1a1a2e; font-size: 10px; color: rgba(255,255,255,0.4); display: flex; justify-content: space-between; }
 </style>
@@ -128,21 +128,19 @@
     <div class="transcript-box" id="transcriptBox">Audio transcript will appear here...</div>
 
     <div class="bottom">
-      <div class="bottom-content">
-        <div class="bottom-left">
-          <div class="status" id="statusText">Ready — press Record to begin</div>
-          <div class="error-text" id="errorText"></div>
-        </div>
-        <div class="bottom-right">
-          <button type="button" class="btn-record" id="recordBtn" onclick="clickRecord()">🎙️</button>
-          <button type="button" class="btn-go" id="goBtn" onclick="clickGO()">GO</button>
-        </div>
+      <div class="status-section">
+        <div class="status" id="statusText">Ready — press Record to begin</div>
+        <div class="error-text" id="errorText"></div>
+      </div>
+      <div class="buttons-section">
+        <button type="button" class="btn-record" id="recordBtn" onclick="clickRecord()">🎙️</button>
+        <button type="button" class="btn-go" id="goBtn" onclick="clickGO()">GO</button>
       </div>
     </div>
 
     <div class="footer">
       <span>© 2026 D2NL Midea</span>
-      <span>Voxera v3.5</span>
+      <span>Voxera v3.6</span>
     </div>
   </div>
 </div>
