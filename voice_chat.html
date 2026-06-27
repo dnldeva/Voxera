@@ -148,9 +148,8 @@
   </div>
 </div>
 <script>
-  const API_KEY = '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';
-  const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-  const MODEL   = 'llama-3.3-70b-versatile';
+  const API_URL = '/api/chat';
+const MODEL   = 'llama-3.3-70b-versatile';
   const WORD_DELAY = 520;
 
   const SYSTEM_PROMPT = `You are an expert Endur ETRM interview coach helping the candidate answer interview questions in real time during a live job interview. Answer AS Mani speaking in first person — confident, specific, referencing real experience.
@@ -367,9 +366,9 @@ INSTRUCTIONS:
     history.push({ role: 'user', content: text });
     addMsg('ai', '', true); setStatus('Processing...');
     try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
+     const res = await fetch(API_URL, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: MODEL, messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history], max_tokens: 450 })
       });
       const data = await res.json();
