@@ -4,7 +4,8 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Voxera — D2NL Midea</title>
-<style>
+<style>#app-container { display: none; }
+#app-container.authenticated { display: block; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ec; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 24px 0; }
   .app { width: 650px; background: #fff; border-radius: 18px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); display: flex; flex-direction: column; overflow: hidden; }
@@ -105,8 +106,11 @@
     document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><div style="text-align:center;"><h1>🔒 Access Denied</h1><p>Invalid username or password.</p><p>Contact admin for credentials.</p></div></div>';
     throw new Error('Unauthorized');
   }
+  window.currentUsername = username;
+  localStorage.setItem('currentUser', username);
+  document.getElementById('app-container').classList.add('authenticated');
 </script>
-
+<div id="app-container">
 <div class="app">
 
   <div class="header">
@@ -164,6 +168,7 @@
     <span class="footer-left">© 2026 D2NL Midea Technologies</span>
     <span class="footer-right">Voxera v2.1 · Enterprise</span>
   </div>
+</div>
 </div>
 <script>
   const API_URL = '/api/chat';
@@ -229,7 +234,7 @@ INSTRUCTIONS:
   let highlightTimer = null;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  function isHighlightOn() { return document.getElementById('highlight-toggle').checked; }.
+  function isHighlightOn() { return document.getElementById('highlight-toggle').checked; }
   // Auto-save conversation every 10 minutes
 let autoSaveInterval = null;
 function startAutoSave() {
