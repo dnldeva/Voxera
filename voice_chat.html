@@ -105,6 +105,8 @@
     document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><div style="text-align:center;"><h1>🔒 Access Denied</h1><p>Invalid username or password.</p><p>Contact admin for credentials.</p></div></div>';
     throw new Error('Unauthorized');
   }
+
+  window.currentUsername = username;
 </script>
 
 <div class="app">
@@ -124,6 +126,13 @@
     <span class="toggle-label">Word highlight &amp; zoom</span>
     <label class="toggle-wrap">
       <input type="checkbox" id="highlight-toggle" checked />
+      <span class="toggle-slider"></span>
+    </label>
+  </div>
+  <div class="toggle-row">
+    <span class="toggle-label">System audio (vs Microphone)</span>
+    <label class="toggle-wrap">
+      <input type="checkbox" id="audio-source-toggle" />
       <span class="toggle-slider"></span>
     </label>
   </div>
@@ -170,7 +179,7 @@
 </div>
 <script>
   const API_URL = '/api/chat';
-const MODEL   = 'llama-3.3-70b-versatile';
+  const MODEL   = 'llama-3.3-70b-versatile';
   const WORD_DELAY = 520;
 
   const SYSTEM_PROMPT = `You are an expert Endur ETRM interview coach helping the candidate answer interview questions in real time during a live job interview. Answer AS Mani speaking in first person — confident, specific, referencing real experience.
@@ -231,6 +240,8 @@ INSTRUCTIONS:
   let currentMode = null, capturedText = '', history = [];
   let highlightTimer = null;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  startAutoSave();
 
   function isHighlightOn() { return document.getElementById('highlight-toggle').checked; }
   function showError(m) { document.getElementById('error').textContent = m; }
@@ -330,6 +341,39 @@ INSTRUCTIONS:
         idx++;
       } else { clearInterval(highlightTimer); wordSpans.forEach(w => w.classList.remove('active-word')); hideZoomPopup(); }
     }, WORD_DELAY);
+  }
+
+  // Auto-save conversation every 10 minutes
+  let autoSaveInterval = null;
+
+  function startAutoSave() {
+    if (autoSaveInterval) clearInterval(autoSaveInterval);
+    autoSaveInterval = setInterval(saveConversation, 600000); // 10 minutes
+  }
+
+  async function saveConversation() {
+    if (history.length === 0) return;
+    
+    try {
+      const conversationData = {
+        timestamp: new Date().toISOString(),
+        username: window.currentUsername,
+        messages: history,
+        audioMode: document.getElementById('audio-source-toggle').checked ? 'system-audio' : 'microphone'
+      };
+      
+      const response = await fetch('/api/save-conversation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(conversationData)
+      });
+      
+      if (response.ok) {
+        console.log('✅ Conversation auto-saved');
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+    }
   }
 
   function resetMicButtons() {
