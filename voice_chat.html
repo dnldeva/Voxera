@@ -111,14 +111,14 @@
     </div>
 
     <div class="toggle-bar">
-      <span class="toggle-label">📡 System Audio (Stereo Mode)</span>
+      <span class="toggle-label">🎤 Microphone</span>
       <span class="transcripts-link" onclick="location.href='user-transcripts.html'">📋 My Transcripts</span>
     </div>
 
     <div class="messages" id="msgList">
       <div class="message ai">
         <div class="avatar ai">D2N</div>
-        <div class="bubble">Welcome! Press Record to capture system audio, then GO for an answer.</div>
+        <div class="bubble">Welcome! Press Record to speak, then GO for an answer.</div>
       </div>
     </div>
 
@@ -130,14 +130,14 @@
         <div class="error-text" id="errorMsg"></div>
       </div>
       <div class="buttons-section">
-        <button type="button" class="btn-record" id="recordBtn" onclick="record()">🎙️</button>
+        <button type="button" class="btn-record" id="recordBtn" onclick="record()">🎤</button>
         <button type="button" class="btn-go" id="goBtn" onclick="send()">GO</button>
       </div>
     </div>
 
     <div class="footer">
       <span>© 2026 D2NL Midea</span>
-      <span>Voxera v4.2</span>
+      <span>Voxera v4.3</span>
     </div>
   </div>
 </div>
@@ -184,21 +184,11 @@
     text = '';
     clrErr();
     document.getElementById('recordBtn').classList.add('listening');
-    status('📡 Requesting screen share...');
+    status('🎤 Listening... (click to stop)');
     show('', true);
 
     try {
-      // System audio only - getDisplayMedia
-      stream = await navigator.mediaDevices.getDisplayMedia({ 
-        video: false, 
-        audio: { 
-          echoCancellation: false, 
-          noiseSuppression: false, 
-          autoGainControl: false 
-        } 
-      });
-
-      status('📡 Capturing system audio... (click to stop)');
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
       rec = new SR();
       rec.lang = 'en-GB';
@@ -220,7 +210,7 @@
     } catch (e) {
       isRec = false;
       document.getElementById('recordBtn').classList.remove('listening');
-      err('Screen share cancelled or not supported');
+      err('Microphone access denied');
     }
   }
 
