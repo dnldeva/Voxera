@@ -3,24 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Voxera Login</title>
+<title>Voxera — D2NL Midea</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ec; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-  
-  .login-container { width: 100%; max-width: 400px; background: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); }
-  .logo { width: 60px; height: 60px; background: #94FF33; border-radius: 12px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: #1a1a1a; }
-  h1 { font-size: 28px; color: #1a1a2e; margin-bottom: 8px; text-align: center; }
-  p { text-align: center; color: #999; margin-bottom: 32px; font-size: 14px; }
-  .form-group { margin-bottom: 16px; }
-  .form-group label { display: block; font-size: 12px; font-weight: 600; color: #777; margin-bottom: 8px; text-transform: uppercase; }
-  .form-group input { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; }
-  .form-group input:focus { outline: none; border-color: #EF9F27; }
-  .login-btn { width: 100%; padding: 12px; background: #1a1a2e; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; margin-top: 20px; }
-  .login-btn:hover { background: #2a2a4e; }
-  .error { color: #c0392b; text-align: center; margin-top: 16px; font-size: 13px; }
-  .app { display: none; width: 650px; background: #fff; border-radius: 18px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); overflow: hidden; flex-direction: column; }
-  .app.visible { display: flex; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ec; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 24px 0; }
+  .app { width: 650px; background: #fff; border-radius: 18px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); display: flex; flex-direction: column; overflow: hidden; }
   .header { padding: 16px 24px; background: #1a1a2e; display: flex; align-items: center; gap: 12px; }
   .logo-mark { width: 36px; height: 36px; border-radius: 8px; background: #94FF33; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #1a1a1a; flex-shrink: 0; }
   .logo-text { display: flex; flex-direction: column; }
@@ -29,50 +16,72 @@
   .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
   .plan-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: rgba(239,159,39,0.15); color: #EF9F27; }
   .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4caf50; }
-  .toggle-row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 8px 20px; background: #f8f8f5; border-bottom: 1px solid #eee; }
-  .transcript-link { cursor: pointer; color: #EF9F27; text-decoration: underline; font-size: 11px; }
-  .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; max-height: 360px; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 20px; background: #f8f8f5; border-bottom: 1px solid #eee; }
+  .toggle-label { font-size: 12px; color: #777; }
+  .toggle-wrap { position: relative; width: 40px; height: 22px; }
+  .toggle-wrap input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ccc; border-radius: 22px; transition: 0.3s; }
+  .toggle-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s; }
+  input:checked + .toggle-slider { background: #EF9F27; }
+  input:checked + .toggle-slider:before { transform: translateX(18px); }
+  .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; min-height: 280px; max-height: 360px; }
   .msg { display: flex; gap: 12px; align-items: flex-start; }
-  .avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; background: #94FF33; color: #1a1a1a; }
-  .bubble { max-width: 80%; padding: 12px 16px; border-radius: 14px; font-size: 14px; line-height: 1.65; background: #FFF8EC; color: #5a3e00; }
+  .msg.interviewer { flex-direction: row; }
+  .msg.ai { flex-direction: row; }
+  .msg.candidate { flex-direction: row-reverse; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+  .avatar.interviewer-av { background: #1a1a2e; color: #EF9F27; font-size: 9px; }
+  .avatar.ai-av { background: #94FF33; color: #1a1a1a; font-size: 9px; }
+  .avatar.candidate-av { background: #e8f5e9; color: #2e7d32; font-size: 9px; }
+  .bubble { max-width: 80%; padding: 12px 16px; border-radius: 14px; font-size: 14px; line-height: 1.65; }
+  .msg.interviewer .bubble { background: #f0f0f8; color: #1a1a2e; border-radius: 4px 14px 14px 14px; border-left: 3px solid #1a1a2e; }
+  .msg.ai .bubble { background: #FFF8EC; color: #5a3e00; border-radius: 4px 14px 14px 14px; border-left: 3px solid #EF9F27; }
+  .msg.candidate .bubble { background: #e8f5e9; color: #1b5e20; border-radius: 14px 4px 14px 14px; }
+  .label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 5px; opacity: 0.55; text-transform: uppercase; }
   .transcript-box { margin: 0 16px; min-height: 54px; background: #f8f8f5; border-radius: 10px; padding: 12px 16px; font-size: 14px; color: #777; border: 1.5px dashed #ddd; display: flex; align-items: center; }
   .transcript-box.active { background: #f0f0f8; border-color: #1a1a2e; color: #1a1a2e; }
+  .transcript-box.recording { background: #fff8f8; border-color: #E24B4A; color: #333; }
   .bottom { padding: 14px 20px 18px; border-top: 1px solid #eee; background: #fafafa; }
-  .controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+  .controls-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+  .right-controls { display: flex; align-items: center; gap: 14px; }
   .go-btn { width: 78px; height: 78px; border-radius: 50%; border: none; background: #1a1a2e; color: #EF9F27; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 12px rgba(26,26,46,0.3); display: flex; align-items: center; justify-content: center; }
-  .go-btn:hover { background: #2a2a4e; }
-  .go-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .interviewer-btn button { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #1a1a2e; background: #fff; cursor: pointer; font-weight: 600; font-size: 28px; }
+  .go-btn:hover { background: #2a2a4e; transform: scale(1.05); }
+  .interviewer-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .interviewer-btn button { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #1a1a2e; background: #fff; cursor: pointer; font-weight: 600; font-size: 28px; display: flex; align-items: center; justify-content: center; }
   .interviewer-btn button:hover { background: #1a1a2e; color: #EF9F27; }
-  .interviewer-btn button.listening { background: #E24B4A; color: #fff; animation: pulse 1s infinite; }
+  .interviewer-btn button.listening { background: #1a1a2e; color: #E24B4A; animation: pulse 1s infinite; }
   @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(226,75,74,0.3)} 50%{box-shadow:0 0 0 12px rgba(226,75,74,0)} }
+  .candidate-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .candidate-btn button { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #2e7d32; background: #fff; cursor: pointer; font-weight: 600; font-size: 28px; display: flex; align-items: center; justify-content: center; }
+  .candidate-btn button:hover { background: #e8f5e9; color: #2e7d32; }
+  .candidate-btn button.listening { background: #e8f5e9; color: #E24B4A; animation: pulse 1s infinite; border-color: #E24B4A; }
+  .candidate-btn span { font-size: 11px; color: #2e7d32; font-weight: 600; text-transform: uppercase; }
+  .interviewer-btn span { font-size: 11px; color: #1a1a2e; font-weight: 600; text-transform: uppercase; }
   .status { font-size: 13px; color: #999; text-align: center; margin-top: 10px; }
-  .error-msg { font-size: 12px; color: #c0392b; text-align: center; margin-top: 4px; }
+  .error { font-size: 12px; color: #c0392b; text-align: center; margin-top: 4px; }
+  .mode-indicator { font-size: 12px; text-align: center; padding: 5px 14px; border-radius: 20px; display: none; margin-bottom: 6px; }
+  .mode-indicator.interviewer { display: block; background: #f0f0f8; color: #1a1a2e; border: 1px solid #1a1a2e; }
   .footer { padding: 10px 24px; background: #1a1a2e; font-size: 11px; color: rgba(255,255,255,0.35); display: flex; justify-content: space-between; }
+  .transcript-link { cursor: pointer; color: #EF9F27; text-decoration: underline; }
 </style>
 </head>
 <body>
 
-<div class="login-container" id="login-screen">
-  <div class="logo">D2N</div>
-  <h1>Voxera</h1>
-  <p>AI Interview Assistant</p>
+<script>
+  const VALID_USERS = { 'alice': 'password123', 'bob': 'securepass456', 'charlie': 'mypassword789' };
+  const u = prompt('👤 Username:');
+  const p = prompt('🔐 Password:');
   
-  <form onsubmit="handleLogin(event)">
-    <div class="form-group">
-      <label>Username</label>
-      <input type="text" id="username" placeholder="e.g., alice" required autofocus />
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="password" placeholder="Enter password" required />
-    </div>
-    <button type="submit" class="login-btn">Sign In</button>
-    <div class="error" id="login-error"></div>
-  </form>
-</div>
+  if (!VALID_USERS[u] || VALID_USERS[u] !== p) {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;"><div><h1>🔒 Access Denied</h1><p>Invalid username or password.</p></div></div>';
+    throw new Error('Unauthorized');
+  }
+  
+  window.currentUsername = u;
+  localStorage.setItem('currentUser', u);
+</script>
 
-<div class="app" id="app">
+<div class="app">
   <div class="header">
     <div class="logo-mark">D2N</div>
     <div class="logo-text">
@@ -86,27 +95,47 @@
   </div>
 
   <div class="toggle-row">
-    <span style="margin-left: auto; font-size: 11px; color: #EF9F27; cursor: pointer; text-decoration: underline;" onclick="window.location.href='user-transcripts.html'">📋 My Transcripts</span>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span class="toggle-label">Stereo Mode (System Audio)</span>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="stereo-toggle" checked />
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <span class="transcript-link" onclick="window.location.href='user-transcripts.html'">📋 My Transcripts</span>
   </div>
+
+  <div class="mode-indicator" id="mode-indicator"></div>
 
   <div class="messages" id="messages">
-    <div class="msg">
-      <div class="avatar">D2N</div>
-      <div class="bubble">Welcome! Press <strong>🎤 Record</strong> to speak a question, then <strong>GO</strong> for an AI answer.</div>
+    <div class="msg ai">
+      <div class="avatar ai-av">D2N</div>
+      <div class="bubble">
+        <div class="label">Voxera Assistant</div>
+        Welcome! Press <strong>Interviewer</strong> to capture questions, then <strong>GO</strong> for answers.
+      </div>
     </div>
   </div>
 
-  <div class="transcript-box" id="transcript-box">Your question will appear here...</div>
+  <div class="transcript-box" id="transcript-box">Audio transcript will appear here...</div>
 
   <div class="bottom">
-    <div class="controls">
-      <div class="interviewer-btn">
-        <button id="mic-btn" onclick="toggleRecord()" title="Click to record">🎤</button>
+    <div class="mode-indicator" id="mode-indicator"></div>
+    <div class="controls-row">
+      <div class="candidate-btn">
+        <button id="candidate-mic" onclick="toggleMic('candidate')" title="Record your response">🎤</button>
+        <span>Respond</span>
       </div>
-      <button class="go-btn" id="go-btn" onclick="submitQuestion()">GO</button>
+      <div class="right-controls">
+        <div class="interviewer-btn">
+          <button id="interviewer-mic" onclick="toggleMic('interviewer')" title="Record interviewer question">🎙️</button>
+          <span>Interviewer</span>
+        </div>
+        <button class="go-btn" id="go-btn" onclick="submitQuestion()">GO</button>
+      </div>
     </div>
-    <div class="status" id="status">Ready — click 🎤 to record</div>
-    <div class="error-msg" id="error"></div>
+    <div class="status" id="status">System ready — press Interviewer to begin</div>
+    <div class="error" id="error"></div>
   </div>
 
   <div class="footer">
@@ -116,24 +145,8 @@
 </div>
 
 <script>
-  const VALID_USERS = { 'alice': 'password123', 'bob': 'securepass456', 'charlie': 'mypassword789' };
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  
-  let recognition = null, isListening = false, capturedText = '', history = [];
-
-  function handleLogin(event) {
-    event.preventDefault();
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    if (VALID_USERS[username] && VALID_USERS[username] === password) {
-      window.currentUsername = username;
-      localStorage.setItem('currentUser', username);
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').classList.add('visible');
-    } else {
-      document.getElementById('login-error').textContent = 'Invalid credentials';
-    }
-  }
+  let recognition = null, isListening = false, capturedText = '', history = [], currentMode = null;
 
   function showError(msg) { document.getElementById('error').textContent = msg; }
   function clearError() { document.getElementById('error').textContent = ''; }
@@ -142,21 +155,65 @@
   function addMsg(role, text) {
     const c = document.getElementById('messages');
     const d = document.createElement('div');
-    d.className = 'msg';
-    d.innerHTML = `<div class="avatar">${role === 'ai' ? 'D2N' : '👤'}</div><div class="bubble"><strong>${role === 'ai' ? 'Voxera' : 'You'}:</strong> ${text}</div>`;
+    d.className = 'msg ' + role;
+    d.innerHTML = `
+      <div class="avatar ${role}-av">${role === 'ai' ? 'D2N' : role === 'candidate' ? 'YOU' : 'INPUT'}</div>
+      <div class="bubble">
+        <div class="label">${role === 'ai' ? 'Voxera Insight' : role === 'candidate' ? 'Your Response' : 'Captured Input'}</div>
+        ${text}
+      </div>
+    `;
     c.appendChild(d);
     d.scrollIntoView({ behavior: 'smooth' });
   }
 
-  function toggleRecord() {
+  async function toggleMic(mode) {
     if (!SR) { showError('Use Chrome or Edge browser'); return; }
     if (isListening) { recognition.stop(); return; }
+
+    const useStereo = document.getElementById('stereo-toggle').checked;
     
+    if (useStereo && mode === 'interviewer') {
+      captureSystemAudio(mode);
+    } else {
+      captureMicrophone(mode);
+    }
+  }
+
+  async function captureSystemAudio(mode) {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: false,
+        audio: { echoCancellation: false, noiseSuppression: false }
+      });
+
+      startRecognition(mode, stream);
+    } catch (e) {
+      showError('Screen share cancelled');
+    }
+  }
+
+  async function captureMicrophone(mode) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      startRecognition(mode, stream);
+    } catch (e) {
+      showError('Microphone access denied');
+    }
+  }
+
+  function startRecognition(mode, stream) {
     isListening = true;
+    currentMode = mode;
     capturedText = '';
     clearError();
-    document.getElementById('mic-btn').classList.add('listening');
-    setStatus('🎤 Recording... (speak now)');
+
+    document.getElementById(mode === 'interviewer' ? 'interviewer-mic' : 'candidate-mic').classList.add('listening');
+    document.getElementById('mode-indicator').className = 'mode-indicator ' + mode;
+    document.getElementById('mode-indicator').textContent = mode === 'interviewer' ? '📡 Capturing system audio...' : '⏺ Recording...';
+    
+    setTranscript('', 'recording');
+    setStatus(mode === 'interviewer' ? '📡 Recording (click again to stop)' : '⏺ Recording (click again to stop)');
 
     recognition = new SR();
     recognition.lang = 'en-GB';
@@ -169,37 +226,39 @@
         if (e.results[i].isFinal) capturedText += e.results[i][0].transcript + ' ';
         else interim += e.results[i][0].transcript;
       }
-      document.getElementById('transcript-box').textContent = capturedText + interim;
-      document.getElementById('transcript-box').classList.add('active');
+      setTranscript(capturedText + interim, 'recording');
     };
 
     recognition.onend = () => {
       isListening = false;
-      document.getElementById('mic-btn').classList.remove('listening');
+      document.getElementById(mode === 'interviewer' ? 'interviewer-mic' : 'candidate-mic').classList.remove('listening');
+      document.getElementById('mode-indicator').className = '';
+      stream.getTracks().forEach(t => t.stop());
+      
       if (capturedText.trim()) {
-        setStatus('Ready — press GO');
+        setTranscript(capturedText.trim(), mode);
+        setStatus('Input captured — press GO');
       } else {
-        setStatus('No speech detected — try again');
-        document.getElementById('transcript-box').classList.remove('active');
+        setTranscript('', '');
+        setStatus('No audio detected');
       }
-    };
-
-    recognition.onerror = (e) => {
-      isListening = false;
-      document.getElementById('mic-btn').classList.remove('listening');
-      showError('Microphone error: ' + e.error);
     };
 
     recognition.start();
   }
 
+  function setTranscript(text, mode) {
+    const box = document.getElementById('transcript-box');
+    box.textContent = text || 'Audio transcript will appear here...';
+    box.className = 'transcript-box' + (mode ? ' ' + mode : '');
+  }
+
   async function submitQuestion() {
     const text = capturedText.trim();
-    if (!text) { showError('No question recorded'); return; }
+    if (!text) { showError('No input captured'); return; }
 
-    addMsg('user', text);
-    document.getElementById('transcript-box').textContent = '';
-    document.getElementById('transcript-box').classList.remove('active');
+    addMsg(currentMode || 'interviewer', text);
+    setTranscript('', '');
     capturedText = '';
     history.push({ role: 'user', content: text });
 
@@ -213,31 +272,40 @@
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
           messages: [
-            { role: 'system', content: 'You are an expert interview coach. Answer concisely in 2-3 sentences.' },
+            { role: 'system', content: 'You are an expert interview coach. Answer concisely.' },
             ...history
           ],
-          max_tokens: 300
+          max_tokens: 450
         })
       });
 
       const data = await res.json();
       if (data.error) {
-        showError('API error: ' + data.error);
+        showError('API error');
       } else {
         const reply = data.choices[0].message.content;
         addMsg('ai', reply);
         history.push({ role: 'assistant', content: reply });
 
-        const transcript = { timestamp: new Date().toISOString(), username: window.currentUsername, messages: history };
-        const all = JSON.parse(localStorage.getItem('transcripts') || '[]');
-        all.push(transcript);
-        localStorage.setItem('transcripts', JSON.stringify(all));
-
-        setStatus('Ready — click 🎤 to continue');
+        // Save transcript as TEXT
+        saveTranscriptAsText();
+        setStatus('Ready — press Interviewer to continue');
       }
     } catch (e) {
       showError('Connection error');
     }
+  }
+
+  function saveTranscriptAsText() {
+    const transcript = {
+      timestamp: new Date().toISOString(),
+      username: window.currentUsername,
+      conversations: history
+    };
+    
+    const transcripts = JSON.parse(localStorage.getItem('transcripts') || '[]');
+    transcripts.push(transcript);
+    localStorage.setItem('transcripts', JSON.stringify(transcripts));
   }
 </script>
 
