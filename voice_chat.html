@@ -3,354 +3,361 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Voxera — Interview Assistant</title>
+<title>Voxera</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ec; }
   
-  .login-screen { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-  .login-screen.hidden { display: none; }
-  .login-box { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); width: 100%; max-width: 400px; }
-  .login-logo { width: 60px; height: 60px; background: #94FF33; border-radius: 12px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; color: #1a1a1a; }
-  .login-title { font-size: 24px; color: #1a1a2e; margin-bottom: 8px; text-align: center; }
-  .login-subtitle { text-align: center; color: #999; margin-bottom: 32px; font-size: 14px; }
-  .form-group { margin-bottom: 16px; }
-  .form-group label { display: block; font-size: 12px; font-weight: 600; color: #777; margin-bottom: 8px; text-transform: uppercase; }
-  .form-group input { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; }
-  .form-group input:focus { outline: none; border-color: #EF9F27; }
-  .login-btn { width: 100%; padding: 12px; background: #1a1a2e; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 20px; }
-  .login-btn:hover { background: #2a2a4e; }
-  .login-error { color: #c0392b; text-align: center; margin-top: 16px; font-size: 13px; min-height: 18px; }
+  .hidden { display: none !important; }
   
-  .app { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 24px 0; }
-  .app.hidden { display: none; }
-  .app-container { width: 650px; background: #fff; border-radius: 18px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); overflow: hidden; display: flex; flex-direction: column; }
+  /* LOGIN */
+  #loginPage { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+  .login-box { width: 100%; max-width: 400px; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+  .logo { width: 50px; height: 50px; background: #94FF33; border-radius: 8px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #1a1a2e; }
+  .login-box h1 { font-size: 24px; color: #1a1a2e; text-align: center; margin-bottom: 8px; }
+  .login-box p { text-align: center; color: #999; margin-bottom: 30px; font-size: 13px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: #777; margin-bottom: 6px; text-transform: uppercase; }
+  .form-group input { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 14px; }
+  .form-group input:focus { outline: none; border-color: #EF9F27; }
+  .login-btn { width: 100%; padding: 12px; background: #1a1a2e; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 20px; }
+  .login-btn:hover { background: #2a2a4e; }
+  .error { color: #c0392b; font-size: 12px; text-align: center; margin-top: 12px; min-height: 16px; }
+  
+  /* APP */
+  #appPage { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+  .app-box { width: 100%; max-width: 650px; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; }
   
   .header { padding: 16px 24px; background: #1a1a2e; display: flex; align-items: center; gap: 12px; }
-  .logo-mark { width: 36px; height: 36px; border-radius: 8px; background: #94FF33; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #1a1a1a; flex-shrink: 0; }
-  .logo-text { display: flex; flex-direction: column; }
-  .logo-name { font-size: 17px; font-weight: 700; color: #fff; }
-  .logo-sub { font-size: 10px; color: #EF9F27; letter-spacing: 1.5px; text-transform: uppercase; }
-  .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-  .plan-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: rgba(239,159,39,0.15); color: #EF9F27; }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4caf50; }
+  .header-logo { width: 36px; height: 36px; background: #94FF33; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #1a1a1a; font-size: 12px; }
+  .header-text { flex: 1; }
+  .header-text h2 { font-size: 16px; color: white; margin-bottom: 2px; }
+  .header-text p { font-size: 9px; color: #EF9F27; text-transform: uppercase; letter-spacing: 1px; }
+  .header-right { display: flex; gap: 8px; align-items: center; }
+  .badge { font-size: 10px; background: rgba(239,159,39,0.15); color: #EF9F27; padding: 3px 10px; border-radius: 20px; }
+  .dot { width: 8px; height: 8px; background: #4caf50; border-radius: 50%; }
   
-  .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 20px; background: #f8f8f5; border-bottom: 1px solid #eee; }
-  .toggle-label { font-size: 12px; color: #777; }
-  .toggle-wrap { position: relative; width: 40px; height: 22px; }
-  .toggle-wrap input { opacity: 0; width: 0; height: 0; }
-  .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ccc; border-radius: 22px; transition: 0.3s; }
-  .toggle-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s; }
-  input:checked + .toggle-slider { background: #EF9F27; }
-  input:checked + .toggle-slider:before { transform: translateX(18px); }
-  .transcript-link { cursor: pointer; color: #EF9F27; text-decoration: underline; font-size: 11px; }
+  .toggle-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #f8f8f5; border-bottom: 1px solid #eee; }
+  .toggle-label { font-size: 11px; color: #777; }
+  .transcripts-link { font-size: 10px; color: #EF9F27; text-decoration: underline; cursor: pointer; }
   
-  .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; max-height: 360px; }
-  .msg { display: flex; gap: 12px; align-items: flex-start; }
-  .msg.interviewer { flex-direction: row; }
-  .msg.ai { flex-direction: row; }
-  .avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
-  .avatar.interviewer-av { background: #1a1a2e; color: #EF9F27; }
-  .avatar.ai-av { background: #94FF33; color: #1a1a1a; }
-  .bubble { max-width: 80%; padding: 12px 16px; border-radius: 14px; font-size: 14px; line-height: 1.65; }
-  .msg.interviewer .bubble { background: #f0f0f8; color: #1a1a2e; border-radius: 4px 14px 14px 14px; border-left: 3px solid #1a1a2e; }
-  .msg.ai .bubble { background: #FFF8EC; color: #5a3e00; border-radius: 4px 14px 14px 14px; border-left: 3px solid #EF9F27; }
-  .label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 5px; opacity: 0.55; text-transform: uppercase; }
+  .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; max-height: 350px; }
+  .message { display: flex; gap: 10px; }
+  .message.user { flex-direction: row-reverse; }
+  .message.ai { flex-direction: row; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+  .avatar.ai { background: #94FF33; color: #1a1a1a; }
+  .avatar.user { background: #1a1a2e; color: #EF9F27; }
+  .bubble { max-width: 75%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.6; }
+  .message.user .bubble { background: #f0f0f8; color: #1a1a2e; }
+  .message.ai .bubble { background: #FFF8EC; color: #5a3e00; }
   
-  .transcript-box { margin: 0 16px; min-height: 54px; background: #f8f8f5; border-radius: 10px; padding: 12px 16px; font-size: 14px; color: #777; border: 1.5px dashed #ddd; display: flex; align-items: center; }
-  .transcript-box.active { background: #f0f0f8; border-color: #1a1a2e; color: #1a1a2e; }
+  .transcript-box { margin: 0 16px 10px 16px; min-height: 50px; padding: 10px 14px; background: #f8f8f5; border-radius: 8px; border: 1.5px dashed #ddd; color: #999; font-size: 13px; display: flex; align-items: center; }
   .transcript-box.recording { background: #fff8f8; border-color: #E24B4A; color: #333; }
   
-  .bottom { padding: 14px 20px 18px; border-top: 1px solid #eee; background: #fafafa; }
-  .controls-row { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 12px; }
-  .go-btn { width: 78px; height: 78px; border-radius: 50%; border: none; background: #1a1a2e; color: #EF9F27; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 12px rgba(26,26,46,0.3); display: flex; align-items: center; justify-content: center; }
-  .go-btn:hover { background: #2a2a4e; transform: scale(1.05); }
+  .bottom { padding: 14px 20px; border-top: 1px solid #eee; background: #fafafa; }
+  .controls { display: flex; justify-content: center; align-items: center; gap: 14px; margin-top: 12px; }
+  .btn-record { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #1a1a2e; background: white; cursor: pointer; font-size: 26px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .btn-record:hover { background: #1a1a2e; color: #EF9F27; }
+  .btn-record.listening { background: #1a1a2e; color: #E24B4A; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(226,75,74,0.3)} 50%{box-shadow:0 0 0 10px rgba(226,75,74,0)} }
   
-  .mic-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .mic-btn button { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #1a1a2e; background: #fff; cursor: pointer; font-weight: 600; font-size: 28px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-  .mic-btn button:hover { background: #1a1a2e; color: #EF9F27; }
-  .mic-btn button.listening { background: #1a1a2e; color: #E24B4A; animation: pulse 1s infinite; }
-  .mic-btn span { font-size: 11px; color: #1a1a2e; font-weight: 600; text-transform: uppercase; }
-  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(226,75,74,0.3)} 50%{box-shadow:0 0 0 12px rgba(226,75,74,0)} }
+  .btn-go { width: 78px; height: 78px; border-radius: 50%; border: none; background: #1a1a2e; color: #EF9F27; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(26,26,46,0.3); }
+  .btn-go:hover { background: #2a2a4e; transform: scale(1.05); }
+  .btn-go:active { transform: scale(0.97); }
   
-  .status { font-size: 13px; color: #999; text-align: center; margin-top: 10px; }
-  .error-msg { font-size: 12px; color: #c0392b; text-align: center; margin-top: 4px; }
-  .mode-indicator { font-size: 12px; text-align: center; padding: 5px 14px; border-radius: 20px; display: none; margin-bottom: 6px; background: #f0f0f8; color: #1a1a2e; border: 1px solid #1a1a2e; }
-  .footer { padding: 10px 24px; background: #1a1a2e; font-size: 11px; color: rgba(255,255,255,0.35); display: flex; justify-content: space-between; }
+  .status { text-align: center; font-size: 12px; color: #999; margin-top: 8px; min-height: 16px; }
+  .error-text { text-align: center; font-size: 11px; color: #c0392b; margin-top: 4px; min-height: 14px; }
+  
+  .footer { padding: 10px 24px; background: #1a1a2e; font-size: 10px; color: rgba(255,255,255,0.4); display: flex; justify-content: space-between; }
 </style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
-<div class="login-screen" id="loginScreen">
+<!-- LOGIN PAGE -->
+<div id="loginPage">
   <div class="login-box">
-    <div class="login-logo">D2N</div>
-    <h1 class="login-title">Voxera</h1>
-    <p class="login-subtitle">AI Interview Assistant</p>
+    <div class="logo">D2N</div>
+    <h1>Voxera</h1>
+    <p>AI Interview Assistant</p>
     
-    <form onsubmit="handleLogin(event)">
+    <form id="loginForm" onsubmit="doLogin(event)">
       <div class="form-group">
         <label>Username</label>
-        <input type="text" id="usernameField" placeholder="e.g., alice" required autofocus />
+        <input type="text" id="user" placeholder="alice" required autofocus />
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="passwordField" placeholder="Enter password" required />
+        <input type="password" id="pass" placeholder="password123" required />
       </div>
       <button type="submit" class="login-btn">Sign In</button>
-      <div class="login-error" id="loginError"></div>
+      <div class="error" id="loginErr"></div>
     </form>
   </div>
 </div>
 
-<!-- APP SCREEN -->
-<div class="app" id="appScreen">
-  <div class="app-container">
+<!-- APP PAGE -->
+<div id="appPage" class="hidden">
+  <div class="app-box">
     <div class="header">
-      <div class="logo-mark">D2N</div>
-      <div class="logo-text">
-        <span class="logo-name">Voxera</span>
-        <span class="logo-sub">D2NL Midea</span>
+      <div class="header-logo">D2N</div>
+      <div class="header-text">
+        <h2>Voxera</h2>
+        <p>D2NL Midea</p>
       </div>
       <div class="header-right">
-        <span class="plan-badge">Pro</span>
-        <div class="status-dot"></div>
+        <span class="badge">Pro</span>
+        <div class="dot"></div>
       </div>
     </div>
 
-    <div class="toggle-row">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span class="toggle-label">System Audio</span>
-        <label class="toggle-wrap">
-          <input type="checkbox" id="stereoToggle" />
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <span class="transcript-link" onclick="window.location.href='user-transcripts.html'">📋 My Transcripts</span>
+    <div class="toggle-bar">
+      <span class="toggle-label">Microphone Mode</span>
+      <span class="transcripts-link" onclick="goToTranscripts()">📋 My Transcripts</span>
     </div>
 
-    <div class="messages" id="messagesList">
-      <div class="msg ai">
-        <div class="avatar ai-av">D2N</div>
-        <div class="bubble">
-          <div class="label">Voxera Assistant</div>
-          Welcome! Press Record to speak your question, then GO for answers.
-        </div>
+    <div class="messages" id="msgList">
+      <div class="message ai">
+        <div class="avatar ai">D2N</div>
+        <div class="bubble">Welcome! Press Record to speak your question, then GO for an answer.</div>
       </div>
     </div>
 
     <div class="transcript-box" id="transcriptBox">Audio transcript will appear here...</div>
 
     <div class="bottom">
-      <div class="mode-indicator" id="modeIndicator"></div>
-      <div class="controls-row">
-        <div class="mic-btn">
-          <button id="micBtn" onclick="toggleRecord()" title="Record question">🎙️</button>
-          <span id="micLabel">Record</span>
-        </div>
-        <button class="go-btn" id="goBtn" onclick="submitQuestion()">GO</button>
+      <div class="controls">
+        <button class="btn-record" id="recordBtn" onclick="toggleRecord()" title="Record">🎤</button>
+        <button class="btn-go" id="goBtn" onclick="sendQuestion()">GO</button>
       </div>
-      <div class="status" id="status">Ready — press Record to begin</div>
-      <div class="error-msg" id="errorMsg"></div>
+      <div class="status" id="statusText">Ready — press Record to begin</div>
+      <div class="error-text" id="errorText"></div>
     </div>
 
     <div class="footer">
       <span>© 2026 D2NL Midea</span>
-      <span>Voxera v2.4</span>
+      <span>Voxera v3.0</span>
     </div>
   </div>
 </div>
 
 <script>
-  let recognition = null;
+  // ===== GLOBAL VARS =====
+  const USERS = {
+    'alice': 'password123',
+    'bob': 'securepass456',
+    'charlie': 'mypassword789'
+  };
+
+  let currentUser = null;
+  let messages = [];
   let isRecording = false;
-  let currentText = '';
+  let recordedText = '';
   let mediaStream = null;
-  let history = [];
+  let recognizer = null;
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  const USERS = { 'alice': 'password123', 'bob': 'securepass456', 'charlie': 'mypassword789' };
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-  // LOGIN
-  function handleLogin(event) {
-    event.preventDefault();
-    const u = document.getElementById('usernameField').value.trim();
-    const p = document.getElementById('passwordField').value.trim();
+  // ===== LOGIN =====
+  function doLogin(e) {
+    e.preventDefault();
+    const username = document.getElementById('user').value.trim();
+    const password = document.getElementById('pass').value.trim();
     
-    if (!USERS[u] || USERS[u] !== p) {
-      document.getElementById('loginError').textContent = 'Invalid username or password';
-      document.getElementById('passwordField').value = '';
+    if (!username || !password) {
+      document.getElementById('loginErr').textContent = 'Enter username and password';
       return;
     }
 
-    window.currentUsername = u;
-    localStorage.setItem('currentUser', u);
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('appScreen').classList.remove('hidden');
+    if (USERS[username] !== password) {
+      document.getElementById('loginErr').textContent = 'Invalid credentials';
+      document.getElementById('pass').value = '';
+      return;
+    }
+
+    currentUser = username;
+    localStorage.setItem('currentUser', username);
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('appPage').classList.remove('hidden');
   }
 
-  // RECORDING
+  // ===== RECORDING =====
   async function toggleRecord() {
-    if (!SR) {
-      showError('Use Chrome or Edge browser');
+    if (!SpeechRec) {
+      showError('Use Chrome or Edge');
       return;
     }
-    
+
     if (isRecording) {
-      stopRecord();
+      stopRecording();
       return;
     }
 
     isRecording = true;
-    currentText = '';
+    recordedText = '';
     clearError();
-    document.getElementById('micBtn').classList.add('listening');
+    document.getElementById('recordBtn').classList.add('listening');
     setStatus('🎤 Recording... (click to stop)');
-    setTranscript('', 'recording');
+    setTranscript('', true);
 
     try {
-      // Always use microphone - it's reliable
       mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      startRecognition();
-    } catch (e) {
+      startListening();
+    } catch (err) {
       isRecording = false;
-      document.getElementById('micBtn').classList.remove('listening');
-      showError('Microphone access denied');
+      document.getElementById('recordBtn').classList.remove('listening');
+      showError('Microphone denied');
     }
   }
 
-  function startRecognition() {
-    recognition = new SR();
-    recognition.lang = 'en-GB';
-    recognition.continuous = true;
-    recognition.interimResults = true;
+  function startListening() {
+    recognizer = new SpeechRec();
+    recognizer.lang = 'en-GB';
+    recognizer.continuous = true;
+    recognizer.interimResults = true;
 
-    recognition.onresult = (e) => {
+    recognizer.onresult = (event) => {
       let interim = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) {
-          currentText += e.results[i][0].transcript + ' ';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          recordedText += transcript + ' ';
         } else {
-          interim += e.results[i][0].transcript;
+          interim += transcript;
         }
       }
-      setTranscript(currentText + interim, 'recording');
+      setTranscript(recordedText + interim, true);
     };
 
-    recognition.onend = () => {
-      stopRecord();
+    recognizer.onend = () => {
+      stopRecording();
     };
 
-    recognition.onerror = (e) => {
-      showError('Mic error: ' + e.error);
-      stopRecord();
+    recognizer.onerror = (event) => {
+      showError('Mic error: ' + event.error);
+      stopRecording();
     };
 
-    recognition.start();
+    recognizer.start();
   }
 
-  function stopRecord() {
+  function stopRecording() {
     isRecording = false;
-    if (recognition) recognition.stop();
+    if (recognizer) recognizer.stop();
     if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
     
-    document.getElementById('micBtn').classList.remove('listening');
-    
-    if (currentText.trim()) {
-      setTranscript(currentText.trim(), '');
-      setStatus('Input captured — press GO');
+    document.getElementById('recordBtn').classList.remove('listening');
+
+    if (recordedText.trim()) {
+      setTranscript(recordedText.trim(), false);
+      setStatus('Ready — press GO');
     } else {
-      setTranscript('', '');
-      setStatus('No speech — try again');
+      setTranscript('', false);
+      setStatus('No audio detected');
     }
   }
 
-  // API
-  async function submitQuestion() {
-    const text = currentText.trim();
+  // ===== API =====
+  async function sendQuestion() {
+    const text = recordedText.trim();
     if (!text) {
       showError('Press Record first');
       return;
     }
 
-    addMsg('interviewer', text);
-    currentText = '';
-    setTranscript('', '');
-    history.push({ role: 'user', content: text });
+    addMessage('user', text);
+    recordedText = '';
+    setTranscript('', false);
+    messages.push({ role: 'user', content: text });
 
     setStatus('⏳ Thinking...');
     clearError();
 
     try {
-      const res = await fetch('/api/chat', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
-          messages: [{ role: 'system', content: 'Expert interview coach. Answer in 2-3 sentences.' }, ...history],
+          messages: [
+            { role: 'system', content: 'You are an expert interview coach. Answer concisely in 2-3 sentences.' },
+            ...messages
+          ],
           max_tokens: 300
         })
       });
 
-      const data = await res.json();
-      
-      if (data.error) {
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
         showError('API error');
-        history.pop();
+        messages.pop();
         return;
       }
 
       const reply = data.choices[0].message.content;
-      addMsg('ai', reply);
-      history.push({ role: 'assistant', content: reply });
+      addMessage('ai', reply);
+      messages.push({ role: 'assistant', content: reply });
+      
       saveTranscript();
       setStatus('Ready — press Record to continue');
-    } catch (e) {
-      showError('Connection error');
-      history.pop();
+    } catch (err) {
+      showError('Connection failed');
+      messages.pop();
     }
   }
 
-  // UI
-  function addMsg(role, text) {
-    const container = document.getElementById('messagesList');
-    const msg = document.createElement('div');
-    msg.className = 'msg ' + role;
-    const av = role === 'ai' ? 'D2N' : 'Q';
-    const avClass = role === 'ai' ? 'ai-av' : 'interviewer-av';
-    const label = role === 'ai' ? 'Voxera Insight' : 'Your Question';
-    msg.innerHTML = `<div class="avatar ${avClass}">${av}</div><div class="bubble"><div class="label">${label}</div>${text}</div>`;
-    container.appendChild(msg);
-    msg.scrollIntoView({ behavior: 'smooth' });
+  // ===== UI =====
+  function addMessage(role, text) {
+    const container = document.getElementById('msgList');
+    const div = document.createElement('div');
+    div.className = 'message ' + role;
+    const avClass = role === 'ai' ? 'ai' : 'user';
+    const avText = role === 'ai' ? 'D2N' : 'Q';
+    div.innerHTML = `<div class="avatar ${avClass}">${avText}</div><div class="bubble">${text}</div>`;
+    container.appendChild(div);
+    div.scrollIntoView({ behavior: 'smooth' });
   }
 
-  function setTranscript(text, mode) {
+  function setTranscript(text, recording) {
     const box = document.getElementById('transcriptBox');
     box.textContent = text || 'Audio transcript will appear here...';
-    box.className = 'transcript-box' + (mode ? ' ' + mode : '');
+    box.className = recording ? 'transcript-box recording' : 'transcript-box';
   }
 
-  function setStatus(msg) { document.getElementById('status').textContent = msg; }
-  function showError(msg) { document.getElementById('errorMsg').textContent = msg; }
-  function clearError() { document.getElementById('errorMsg').textContent = ''; }
+  function setStatus(text) {
+    document.getElementById('statusText').textContent = text;
+  }
 
-  // STORAGE
+  function showError(text) {
+    document.getElementById('errorText').textContent = text;
+  }
+
+  function clearError() {
+    document.getElementById('errorText').textContent = '';
+  }
+
+  function goToTranscripts() {
+    window.location.href = 'user-transcripts.html';
+  }
+
+  // ===== STORAGE =====
   function saveTranscript() {
-    const t = {
+    const transcript = {
       timestamp: new Date().toISOString(),
-      username: window.currentUsername,
-      conversations: history
+      username: currentUser,
+      conversations: messages
     };
     const all = JSON.parse(localStorage.getItem('transcripts') || '[]');
-    all.push(t);
+    all.push(transcript);
     localStorage.setItem('transcripts', JSON.stringify(all));
   }
 
-  // INIT
+  // ===== INIT =====
   window.addEventListener('load', () => {
     if (localStorage.getItem('currentUser')) {
-      document.getElementById('loginScreen').classList.add('hidden');
-      document.getElementById('appScreen').classList.remove('hidden');
+      currentUser = localStorage.getItem('currentUser');
+      document.getElementById('loginPage').classList.add('hidden');
+      document.getElementById('appPage').classList.remove('hidden');
     }
   });
 </script>
