@@ -4,8 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Voxera — D2NL Midea</title>
-<style>#app-container { display: none; }
-#app-container.authenticated { display: block; }
+<style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ec; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 24px 0; }
   .app { width: 650px; background: #fff; border-radius: 18px; box-shadow: 0 4px 28px rgba(0,0,0,0.10); display: flex; flex-direction: column; overflow: hidden; }
@@ -85,74 +84,10 @@
   .footer { padding: 10px 24px; background: #1a1a2e; display: flex; align-items: center; justify-content: space-between; }
   .footer-left { font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 0.5px; }
   .footer-right { font-size: 11px; color: #EF9F27; letter-spacing: 0.5px; }
-/* Toast notification for auto-save */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #1a1a2e;
-  color: #94FF33;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  animation: slideIn 0.3s ease-out, slideOut 0.3s ease-out 2.7s forwards;
-  z-index: 9999;
-}
-
-@keyframes slideIn {
-  from { transform: translateX(400px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes slideOut {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(400px); opacity: 0; }
-}
-
-/* Response time display */
-.response-time {
-  font-size: 11px;
-  color: #EF9F27;
-  text-align: center;
-  margin-top: 8px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
 </style>
 </head>
 <body>
- 
-<script>
-  // Multi-user password authentication
-  const validUsers = {
-    'alice': 'mypassword789',
-    'bob': 'securepass456',
-    'charlie': 'mypassword789',
-    'user1': 'test123',
-    'admin': 'adminpass999'
-  };
-  
-  const username = prompt('👤 Enter username:');
-  const password = prompt('🔐 Enter password:');
-  
-  if (!validUsers[username] || validUsers[username] !== password) {
-    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><div style="text-align:center;"><h1>🔒 Access Denied</h1><p>Invalid username or password.</p><p>Contact admin for credentials.</p></div></div>';
-    throw new Error('Unauthorized');
-  }
-  window.currentUsername = username;
-  localStorage.setItem('currentUser', username);
-  setTimeout(() => {
-  document.getElementById('app-container').classList.add('authenticated');
-}, 100);
-  document.getElementById('app-container').classList.add('authenticated');
-  
-</script>
-
-<div id="app-container">
 <div class="app">
-
   <div class="header">
     <div class="logo-mark">D2N</div>
     <div class="logo-text">
@@ -170,7 +105,6 @@
       <input type="checkbox" id="highlight-toggle" checked />
       <span class="toggle-slider"></span>
     </label>
- <span style="margin-left: auto; font-size: 11px; color: #EF9F27; cursor: pointer;" onclick="window.location.href='user-transcripts.html'">📋 My Transcripts</span>
   </div>
   <div class="zoom-popup" id="zoom-popup"></div>
   <div class="messages" id="messages">
@@ -178,7 +112,7 @@
       <div class="avatar ai-av">D2N</div>
       <div class="bubble">
         <div class="label">Voxera Assistant</div>
-        Welcome To Voxera Assistant <strong>Listen</strong> to capture a question, then <strong>GO</strong> for an instant answer.
+        Welcome Mani. Endur interview context fully loaded — JVS, ab_tran, simulation, TPM, explorer, SQL tuning, settlements, daily challenges and your full resume. Press <strong>Interviewer</strong> to capture a question, then <strong>GO</strong> for an instant answer.
       </div>
     </div>
   </div>
@@ -187,14 +121,17 @@
     <div class="mode-indicator" id="mode-indicator"></div>
     <div class="controls-row">
       <div class="candidate-btn">
-      
+        <button id="candidate-mic" onclick="toggleMic('candidate')" title="Record your response">
+          <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-6 9a6 6 0 0 0 12 0h2a8 8 0 0 1-7 7.93V21h-2v-3.07A8 8 0 0 1 4 10h2z"/></svg>
+        </button>
+        <span>Respond</span>
       </div>
       <div class="right-controls">
         <div class="interviewer-btn">
           <button id="interviewer-mic" onclick="toggleMic('interviewer')" title="Capture interviewer question">
             <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-6 9a6 6 0 0 0 12 0h2a8 8 0 0 1-7 7.93V21h-2v-3.07A8 8 0 0 1 4 10h2z"/></svg>
           </button>
-          <span>CAPTURE</span>
+          <span>Interviewer</span>
         </div>
         <button class="go-btn" id="go-btn" onclick="submitQuestion()">
           <svg viewBox="0 0 24 24"><path d="M2 12l18-9-5 9 5 9z"/></svg>
@@ -204,22 +141,21 @@
     </div>
     <div class="status" id="status">System ready — press Interviewer to begin</div>
     <div class="error" id="error"></div>
-    <div class="response-time" id="response-time"></div>
   </div>
   <div class="footer">
     <span class="footer-left">© 2026 D2NL Midea Technologies</span>
     <span class="footer-right">Voxera v2.1 · Enterprise</span>
   </div>
 </div>
-</div>
 <script>
+  const API_KEY = 'PROXY';
   const API_URL = '/api/chat';
-const MODEL   = 'llama-3.3-70b-versatile';
+  const MODEL   = 'llama-3.3-70b-versatile';
   const WORD_DELAY = 520;
 
   const SYSTEM_PROMPT = `You are an expert Endur ETRM interview coach helping the candidate answer interview questions in real time during a live job interview. Answer AS Mani speaking in first person — confident, specific, referencing real experience.
 
-CANDIDATE: Mani R — Senior Endur Develop | 10 years IT | 9+ years OpenLink Endur (v12-v25)
+CANDIDATE: Mani R — Senior Endur Developer | 10 years IT | 9+ years OpenLink Endur (v12-v25)
 CURRENT: Lead Endur Developer, Accenture (ExxonMobil) — Gas & Power Trading ETRM, 2022–Present
 PREVIOUS: Endur Developer, Chevron — two full programmes (Implementation 2018-2020, Enhancement 2020-2022)
 EARLIER: Software Developer, IT Services Company, 2014–2018 (Java, SQL, PL/SQL)
@@ -277,7 +213,6 @@ INSTRUCTIONS:
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   function isHighlightOn() { return document.getElementById('highlight-toggle').checked; }
- 
   function showError(m) { document.getElementById('error').textContent = m; }
   function clearError() { document.getElementById('error').textContent = ''; }
   function setStatus(m) { document.getElementById('status').textContent = m; }
@@ -379,7 +314,7 @@ INSTRUCTIONS:
 
   function resetMicButtons() {
     document.getElementById('interviewer-mic').className = '';
-    // document.getElementById('candidate-mic') - REMOVED: doesn't exist.className = '';
+    document.getElementById('candidate-mic').className = '';
     showModeIndicator(null);
   }
 
@@ -391,7 +326,7 @@ INSTRUCTIONS:
     recognition.lang = 'en-GB'; recognition.interimResults = true; recognition.continuous = true;
     recognition.onstart = () => {
       isListening = true;
-      document.getElementById('interviewer-mic').className = 'listening';
+      document.getElementById(mode === 'interviewer' ? 'interviewer-mic' : 'candidate-mic').className = 'listening';
       showModeIndicator(mode); setTranscript('', 'recording');
       setStatus(mode === 'interviewer' ? 'Capturing input — press Interviewer again to stop' : 'Recording your voice — press Respond again to stop');
     };
@@ -431,13 +366,10 @@ INSTRUCTIONS:
     setTranscript('', ''); capturedText = '';
     history.push({ role: 'user', content: text });
     addMsg('ai', '', true); setStatus('Processing...');
-  
-  // START TIMER
-  const startTime = performance.now();
     try {
-     const res = await fetch(API_URL, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
         body: JSON.stringify({ model: MODEL, messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history], max_tokens: 450 })
       });
       const data = await res.json();
@@ -447,33 +379,12 @@ INSTRUCTIONS:
         history.push({ role: 'assistant', content: reply });
         removeTyping();
         const bubble = addMsg('ai', reply);
-        // CALCULATE RESPONSE TIME
-        const endTime = performance.now();
-        const responseTime = Math.round(endTime - startTime);
-        
-        // SHOW RESPONSE TIME
-        document.getElementById('response-time').textContent = '?? Response Time: ' + responseTime + 'ms';
-        
         clearError(); setStatus('System ready — press Interviewer to continue');
         if (isHighlightOn()) setTimeout(() => startWordHighlight(bubble, reply), 400);
       }
     } catch(e) { removeTyping(); showError('Connection error — check your network'); history.pop(); }
   }
 </script>
-<script src="js/save-transcript.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
