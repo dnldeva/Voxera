@@ -85,6 +85,41 @@
   .footer { padding: 10px 24px; background: #1a1a2e; display: flex; align-items: center; justify-content: space-between; }
   .footer-left { font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 0.5px; }
   .footer-right { font-size: 11px; color: #EF9F27; letter-spacing: 0.5px; }
+/* Toast notification for auto-save */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #1a1a2e;
+  color: #94FF33;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  animation: slideIn 0.3s ease-out, slideOut 0.3s ease-out 2.7s forwards;
+  z-index: 9999;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(400px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(400px); opacity: 0; }
+}
+
+/* Response time display */
+.response-time {
+  font-size: 11px;
+  color: #EF9F27;
+  text-align: center;
+  margin-top: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
 </style>
 </head>
 <body>
@@ -417,3 +452,5 @@ INSTRUCTIONS:
 <script src="js/save-transcript.js"></script>
 </body>
 </html>
+
+
