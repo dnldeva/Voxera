@@ -20,6 +20,11 @@ async function saveConversation() {
       audioMode: 'system-audio'
     };
     
+    // Save to localStorage
+    const conversationKey = 'voxera_' + window.currentUsername + '_' + Date.now();
+    localStorage.setItem(conversationKey, JSON.stringify(conversationData));
+    
+    // Also send to API for logging
     const response = await fetch('/api/save-conversation', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -55,6 +60,7 @@ function showSaveToast() {
 }
 
 startAutoSave();
+
 
 
 
