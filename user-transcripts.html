@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>My Transcripts — Voxera</title>
+<title>My Transcripts � Voxera</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ec; padding: 20px; }
@@ -39,8 +39,8 @@
 
 <div class="container">
   <div class="header">
-    <h1>📋 My Transcripts</h1>
-    <button class="back-btn" onclick="window.location.href='voice_chat.html'">← Back to Voxera</button>
+    <h1>?? My Transcripts</h1>
+    <button class="back-btn" onclick="window.location.href='voice_chat.html'">? Back to Voxera</button>
   </div>
 
   <div id="transcripts-container" class="transcript-list">
@@ -52,99 +52,14 @@
   <div class="modal-content">
     <div class="modal-header">
       <h2 id="modal-title">Transcript</h2>
-      <button class="close-btn" onclick="closeModal()">✕</button>
+      <button class="close-btn" onclick="closeModal()">?</button>
     </div>
     <div id="modal-body"></div>
-    <button class="download-btn" onclick="downloadTranscript()">📥 Download as JSON</button>
+    <button class="download-btn" onclick="downloadTranscript()">?? Download as JSON</button>
   </div>
 </div>
 
-<script>
-  // Get logged in user
-  const currentUser = localStorage.getItem('currentUser') || 'unknown';
 
-  // Load transcripts
-  async function loadTranscripts() {
-    try {
-      const response = await fetch('/api/get-conversations');
-      const data = await response.json();
-      
-      // Filter conversations for current user
-      const userConversations = data.conversations.filter(c => c.username === currentUser);
-      
-      if (userConversations.length === 0) {
-        document.getElementById('transcripts-container').innerHTML = 
-          '<div class="empty">No transcripts saved yet. Start a conversation in Voxera!</div>';
-        return;
-      }
-
-      // Display transcripts
-      let html = '';
-      userConversations.forEach((conv, idx) => {
-        const date = new Date(conv.timestamp).toLocaleString();
-        const firstQuestion = conv.messages.find(m => m.role === 'user')?.content || 'No content';
-        const preview = firstQuestion.substring(0, 100) + '...';
-
-        html += `
-          <div class="transcript-item" onclick="viewTranscript(${idx}, '${date}')">
-            <h3>Conversation ${idx + 1}</h3>
-            <div class="date">${date}</div>
-            <div class="preview">${preview}</div>
-          </div>
-        `;
-      });
-
-      document.getElementById('transcripts-container').innerHTML = html;
-      window.allConversations = userConversations; // Store for later use
-    } catch (error) {
-      console.error('Error loading transcripts:', error);
-      document.getElementById('transcripts-container').innerHTML = 
-        '<div class="empty">Error loading transcripts. Please refresh.</div>';
-    }
-  }
-
-  // View single transcript
-  function viewTranscript(idx, date) {
-    const conv = window.allConversations[idx];
-    let html = '';
-
-    conv.messages.forEach(msg => {
-      const role = msg.role === 'user' ? 'user' : 'assistant';
-      html += `
-        <div class="message ${role}">
-          <div class="message-label">${role === 'user' ? 'Your Question' : 'Voxera Answer'}</div>
-          <div class="message-text">${msg.content}</div>
-        </div>
-      `;
-    });
-
-    document.getElementById('modal-title').textContent = `Conversation — ${date}`;
-    document.getElementById('modal-body').innerHTML = html;
-    document.getElementById('modal').classList.add('visible');
-    window.currentTranscript = conv; // Store for download
-  }
-
-  // Close modal
-  function closeModal() {
-    document.getElementById('modal').classList.remove('visible');
-  }
-
-  // Download transcript as JSON
-  function downloadTranscript() {
-    if (!window.currentTranscript) return;
-
-    const json = JSON.stringify(window.currentTranscript, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `transcript-${new Date().getTime()}.json`;
-    a.click();
-  }
-
-  // Load on page load
-  loadTranscripts();
-</script>
 
 </body>
 </html>
