@@ -379,7 +379,7 @@ INSTRUCTIONS:
 
   function resetMicButtons() {
     document.getElementById('interviewer-mic').className = '';
-    document.getElementById('candidate-mic').className = '';
+    // document.getElementById('candidate-mic') - REMOVED: doesn't exist.className = '';
     showModeIndicator(null);
   }
 
@@ -391,7 +391,7 @@ INSTRUCTIONS:
     recognition.lang = 'en-GB'; recognition.interimResults = true; recognition.continuous = true;
     recognition.onstart = () => {
       isListening = true;
-      document.getElementById(mode === 'interviewer' ? 'interviewer-mic' : 'candidate-mic').className = 'listening';
+      document.getElementById('interviewer-mic').className = 'listening';
       showModeIndicator(mode); setTranscript('', 'recording');
       setStatus(mode === 'interviewer' ? 'Capturing input — press Interviewer again to stop' : 'Recording your voice — press Respond again to stop');
     };
@@ -463,6 +463,8 @@ INSTRUCTIONS:
 <script src="js/save-transcript.js"></script>
 </body>
 </html>
+
+
 
 
 
