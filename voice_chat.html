@@ -112,7 +112,9 @@
   document.getElementById('app-container').classList.add('authenticated');
 }, 100);
   document.getElementById('app-container').classList.add('authenticated');
+  
 </script>
+<script src="js/save-transcript.js"></script>
 <div id="app-container">
 <div class="app">
 
@@ -133,6 +135,7 @@
       <input type="checkbox" id="highlight-toggle" checked />
       <span class="toggle-slider"></span>
     </label>
+ <span style="margin-left: auto; font-size: 11px; color: #EF9F27; cursor: pointer;" onclick="window.location.href='user-transcripts.html'">📋 My Transcripts</span>
   </div>
   <div class="zoom-popup" id="zoom-popup"></div>
   <div class="messages" id="messages">
@@ -238,38 +241,7 @@ INSTRUCTIONS:
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   function isHighlightOn() { return document.getElementById('highlight-toggle').checked; }
-  // Auto-save conversation every 10 minutes
-let autoSaveInterval = null;
-function startAutoSave() {
-  if (autoSaveInterval) clearInterval(autoSaveInterval);
-  autoSaveInterval = setInterval(saveConversation, 600000); // 10 minutes
-}
-
-async function saveConversation() {
-  if (history.length === 0) return;
-  
-  try {
-    const conversationData = {
-      timestamp: new Date().toISOString(),
-      username: window.currentUsername,
-      messages: history,
-      audioMode: 'system-audio'
-    };
-    
-    const response = await fetch('/api/save-conversation', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(conversationData)
-    });
-    
-    if (response.ok) {
-      console.log('✅ Conversation auto-saved');
-    }
-  } catch (error) {
-    console.error('Save error:', error);
-  }
-}
-startAutoSave();
+ 
   function showError(m) { document.getElementById('error').textContent = m; }
   function clearError() { document.getElementById('error').textContent = ''; }
   function setStatus(m) { document.getElementById('status').textContent = m; }

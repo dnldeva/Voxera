@@ -1,130 +1,149 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Voxera — My Transcripts</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ec; padding: 24px; }
-    .container { max-width: 900px; margin: 0 auto; }
-    .header { background: #1a1a2e; color: #fff; padding: 24px; border-radius: 12px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
-    .header h1 { font-size: 24px; }
-    .back-btn { background: #EF9F27; color: #1a1a2e; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-    .back-btn:hover { background: #f0b03c; }
-    .transcripts-list { display: flex; flex-direction: column; gap: 12px; }
-    .transcript-item { background: #fff; padding: 16px; border-radius: 10px; border-left: 4px solid #EF9F27; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .transcript-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
-    .date { font-weight: 700; color: #1a1a2e; font-size: 16px; }
-    .details { display: flex; gap: 16px; font-size: 13px; color: #777; margin-top: 8px; }
-    .action-buttons { display: flex; gap: 10px; margin-top: 12px; }
-    .view-btn, .download-btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
-    .view-btn { background: #1a1a2e; color: #fff; }
-    .view-btn:hover { background: #2a2a4e; }
-    .download-btn { background: #EF9F27; color: #1a1a2e; }
-    .download-btn:hover { background: #f0b03c; }
-    .empty { text-align: center; padding: 40px; color: #999; background: #fff; border-radius: 10px; }
-    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
-    .modal.active { display: flex; }
-    .modal-content { background: #fff; border-radius: 12px; max-width: 700px; max-height: 80vh; overflow-y: auto; padding: 24px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #eee; }
-    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
-    .conversation-text { font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.8; background: #f8f8f5; padding: 16px; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Transcripts — Voxera</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ec; padding: 20px; }
+  .container { max-width: 900px; margin: 0 auto; }
+  .header { background: #1a1a2e; color: #fff; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+  .header h1 { font-size: 24px; }
+  .back-btn { background: #EF9F27; color: #1a1a2e; padding: 8px 16px; border-radius: 5px; text-decoration: none; cursor: pointer; border: none; font-weight: bold; }
+  .back-btn:hover { background: #fff; }
+  .transcript-list { display: flex; flex-direction: column; gap: 12px; }
+  .transcript-item { background: #fff; padding: 16px; border-radius: 8px; border-left: 4px solid #EF9F27; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s; }
+  .transcript-item:hover { transform: translateX(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .transcript-item h3 { color: #1a1a2e; margin-bottom: 6px; }
+  .transcript-item .date { font-size: 12px; color: #999; }
+  .transcript-item .preview { font-size: 14px; color: #666; margin-top: 8px; line-height: 1.4; }
+  .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+  .modal.visible { display: flex; }
+  .modal-content { background: #fff; padding: 30px; border-radius: 10px; max-width: 700px; max-height: 80vh; overflow-y: auto; }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .modal-header h2 { color: #1a1a2e; }
+  .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+  .close-btn:hover { color: #1a1a2e; }
+  .message { margin-bottom: 16px; padding: 12px; border-radius: 8px; }
+  .message.user { background: #f0f0f8; border-left: 3px solid #1a1a2e; }
+  .message.assistant { background: #FFF8EC; border-left: 3px solid #EF9F27; }
+  .message-label { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; margin-bottom: 6px; }
+  .message-text { color: #333; line-height: 1.5; }
+  .empty { text-align: center; padding: 40px; color: #999; }
+  .download-btn { background: #EF9F27; color: #1a1a2e; padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; margin-top: 12px; }
+  .download-btn:hover { background: #1a1a2e; color: #EF9F27; }
+</style>
 </head>
 <body>
 
 <div class="container">
   <div class="header">
     <h1>📋 My Transcripts</h1>
-    <button class="back-btn" onclick="window.location.href='voice_chat.html'">← Back to App</button>
+    <button class="back-btn" onclick="window.location.href='voice_chat.html'">← Back to Voxera</button>
   </div>
 
-  <div class="transcripts-list" id="transcripts-list">
-    <div class="empty">Loading your transcripts...</div>
+  <div id="transcripts-container" class="transcript-list">
+    <div class="empty">Loading transcripts...</div>
   </div>
 </div>
 
-<div class="modal" id="transcript-modal">
+<div id="modal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
       <h2 id="modal-title">Transcript</h2>
-      <button class="close-btn" onclick="closeModal()">×</button>
+      <button class="close-btn" onclick="closeModal()">✕</button>
     </div>
-    <div id="conversation-detail"></div>
+    <div id="modal-body"></div>
+    <button class="download-btn" onclick="downloadTranscript()">📥 Download as JSON</button>
   </div>
 </div>
 
 <script>
-  function loadMyTranscripts() {
-    const currentUser = localStorage.getItem('currentUser');
-    const allTranscripts = JSON.parse(localStorage.getItem('transcripts') || '[]');
-    const myTranscripts = allTranscripts.filter(t => t.username === currentUser);
+  // Get logged in user
+  const currentUser = localStorage.getItem('currentUser') || 'unknown';
 
-    const list = document.getElementById('transcripts-list');
-    
-    if (myTranscripts.length === 0) {
-      list.innerHTML = '<div class="empty">No transcripts yet. Start a conversation!</div>';
-      return;
+  // Load transcripts
+  async function loadTranscripts() {
+    try {
+      const response = await fetch('/api/get-conversations');
+      const data = await response.json();
+      
+      // Filter conversations for current user
+      const userConversations = data.conversations.filter(c => c.username === currentUser);
+      
+      if (userConversations.length === 0) {
+        document.getElementById('transcripts-container').innerHTML = 
+          '<div class="empty">No transcripts saved yet. Start a conversation in Voxera!</div>';
+        return;
+      }
+
+      // Display transcripts
+      let html = '';
+      userConversations.forEach((conv, idx) => {
+        const date = new Date(conv.timestamp).toLocaleString();
+        const firstQuestion = conv.messages.find(m => m.role === 'user')?.content || 'No content';
+        const preview = firstQuestion.substring(0, 100) + '...';
+
+        html += `
+          <div class="transcript-item" onclick="viewTranscript(${idx}, '${date}')">
+            <h3>Conversation ${idx + 1}</h3>
+            <div class="date">${date}</div>
+            <div class="preview">${preview}</div>
+          </div>
+        `;
+      });
+
+      document.getElementById('transcripts-container').innerHTML = html;
+      window.allConversations = userConversations; // Store for later use
+    } catch (error) {
+      console.error('Error loading transcripts:', error);
+      document.getElementById('transcripts-container').innerHTML = 
+        '<div class="empty">Error loading transcripts. Please refresh.</div>';
     }
-
-    list.innerHTML = myTranscripts.map((transcript, idx) => `
-      <div class="transcript-item">
-        <div class="date">${new Date(transcript.timestamp).toLocaleDateString()} ${new Date(transcript.timestamp).toLocaleTimeString()}</div>
-        <div class="details">
-          <span>${transcript.conversations.length} exchanges</span>
-        </div>
-        <div class="action-buttons">
-          <button class="view-btn" onclick="viewTranscript(${idx})">👁️ View</button>
-          <button class="download-btn" onclick="downloadAsText(${idx})">⬇️ Download (TXT)</button>
-        </div>
-      </div>
-    `).join('');
   }
 
-  function viewTranscript(idx) {
-    const currentUser = localStorage.getItem('currentUser');
-    const allTranscripts = JSON.parse(localStorage.getItem('transcripts') || '[]');
-    const myTranscripts = allTranscripts.filter(t => t.username === currentUser);
-    const transcript = myTranscripts[idx];
+  // View single transcript
+  function viewTranscript(idx, date) {
+    const conv = window.allConversations[idx];
+    let html = '';
 
-    let textContent = '';
-    transcript.conversations.forEach(msg => {
-      const speaker = msg.role === 'user' ? 'YOU' : 'VOXERA';
-      textContent += `[${speaker}]\n${msg.content}\n\n`;
+    conv.messages.forEach(msg => {
+      const role = msg.role === 'user' ? 'user' : 'assistant';
+      html += `
+        <div class="message ${role}">
+          <div class="message-label">${role === 'user' ? 'Your Question' : 'Voxera Answer'}</div>
+          <div class="message-text">${msg.content}</div>
+        </div>
+      `;
     });
 
-    document.getElementById('conversation-detail').innerHTML = `<div class="conversation-text">${textContent}</div>`;
-    document.getElementById('modal-title').textContent = `Transcript - ${new Date(transcript.timestamp).toLocaleDateString()}`;
-    document.getElementById('transcript-modal').classList.add('active');
+    document.getElementById('modal-title').textContent = `Conversation — ${date}`;
+    document.getElementById('modal-body').innerHTML = html;
+    document.getElementById('modal').classList.add('visible');
+    window.currentTranscript = conv; // Store for download
   }
 
+  // Close modal
   function closeModal() {
-    document.getElementById('transcript-modal').classList.remove('active');
+    document.getElementById('modal').classList.remove('visible');
   }
 
-  function downloadAsText(idx) {
-    const currentUser = localStorage.getItem('currentUser');
-    const allTranscripts = JSON.parse(localStorage.getItem('transcripts') || '[]');
-    const myTranscripts = allTranscripts.filter(t => t.username === currentUser);
-    const transcript = myTranscripts[idx];
+  // Download transcript as JSON
+  function downloadTranscript() {
+    if (!window.currentTranscript) return;
 
-    let textContent = `VOXERA INTERVIEW TRANSCRIPT\nUser: ${currentUser}\nDate: ${new Date(transcript.timestamp).toLocaleString()}\n\n---\n\n`;
-    
-    transcript.conversations.forEach(msg => {
-      const speaker = msg.role === 'user' ? 'YOU' : 'VOXERA';
-      textContent += `[${speaker}]\n${msg.content}\n\n`;
-    });
-
-    const blob = new Blob([textContent], { type: 'text/plain' });
+    const json = JSON.stringify(window.currentTranscript, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `transcript_${currentUser}_${new Date(transcript.timestamp).toISOString().split('T')[0]}.txt`;
+    a.download = `transcript-${new Date().getTime()}.json`;
     a.click();
   }
 
-  loadMyTranscripts();
+  // Load on page load
+  loadTranscripts();
 </script>
 
 </body>
