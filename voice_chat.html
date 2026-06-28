@@ -204,6 +204,7 @@
     </div>
     <div class="status" id="status">System ready — press Interviewer to begin</div>
     <div class="error" id="error"></div>
+    <div class="response-time" id="response-time"></div>
   </div>
   <div class="footer">
     <span class="footer-left">© 2026 D2NL Midea Technologies</span>
@@ -430,6 +431,9 @@ INSTRUCTIONS:
     setTranscript('', ''); capturedText = '';
     history.push({ role: 'user', content: text });
     addMsg('ai', '', true); setStatus('Processing...');
+  
+  // START TIMER
+  const startTime = performance.now();
     try {
      const res = await fetch(API_URL, {
   method: 'POST',
@@ -443,6 +447,13 @@ INSTRUCTIONS:
         history.push({ role: 'assistant', content: reply });
         removeTyping();
         const bubble = addMsg('ai', reply);
+        // CALCULATE RESPONSE TIME
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+        
+        // SHOW RESPONSE TIME
+        document.getElementById('response-time').textContent = '?? Response Time: ' + responseTime + 'ms';
+        
         clearError(); setStatus('System ready — press Interviewer to continue');
         if (isHighlightOn()) setTimeout(() => startWordHighlight(bubble, reply), 400);
       }
@@ -452,5 +463,11 @@ INSTRUCTIONS:
 <script src="js/save-transcript.js"></script>
 </body>
 </html>
+
+
+
+
+
+
 
 

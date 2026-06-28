@@ -5,7 +5,7 @@ let autoSaveInterval = null;
 
 function startAutoSave() {
   if (autoSaveInterval) clearInterval(autoSaveInterval);
-  autoSaveInterval = setInterval(saveConversation, 100000); // 10 minutes
+  autoSaveInterval = setInterval(saveConversation, 300000); // 10 minutes
 }
 
 async function saveConversation() {
