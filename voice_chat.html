@@ -370,7 +370,7 @@ INSTRUCTIONS:
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
-        body: JSON.stringify({ model: MODEL, messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history], max_tokens: 450 })
+        body: JSON.stringify({ model: MODEL, messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history], max_tokens: 180 })
       });
       const data = await res.json();
       if (data.error) { removeTyping(); showError('Service error — please try again'); history.pop(); }
