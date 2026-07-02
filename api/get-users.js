@@ -1,27 +1,10 @@
-﻿export default async function handler(req, res) {
-  const users = [
-    {
-      "username": "alice",
-      "password": "password123",
-      "expiryHours": 24,
-      "createdAt": "2026-06-27T00:00:00.000Z",
-      "expiresAt": "2026-06-28T00:00:00.000Z"
-    },
-    {
-      "username": "bob",
-      "password": "securepass456",
-      "expiryHours": 24,
-      "createdAt": "2026-06-27T00:00:00.000Z",
-      "expiresAt": "2026-06-28T00:00:00.000Z"
-    },
-    {
-      "username": "charlie",
-      "password": "mypassword789",
-      "expiryHours": 24,
-      "createdAt": "2026-06-27T00:00:00.000Z",
-      "expiresAt": "2026-06-28T00:00:00.000Z"
-    }
-  ];
-  
+// api/get-users.js
+// FIXED: previously returned a hardcoded, disconnected copy of alice/bob/charlie
+// regardless of what was actually in users.json. Now reads the real file, so
+// admin.html shows what's actually configured for login.
+
+const users = require('../users.json');
+
+module.exports = async function handler(req, res) {
   return res.status(200).json({ users });
-}
+};
