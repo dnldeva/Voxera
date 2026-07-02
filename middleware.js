@@ -49,7 +49,7 @@ export default async function middleware(request) {
 
   const [username, expiry, signature] = parts;
   const payload = `${username}.${expiry}`;
-  const secret = process.env.SESSION_SECRET;
+  const secret = process.env.SECRET;
 
   const valid = await verifySignature(payload, signature, secret);
   const notExpired = Date.now() < Number(expiry);

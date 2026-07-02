@@ -15,10 +15,10 @@ module.exports = async (req, res) => {
   }
 
   const { username, password } = req.body || {};
-  const secret = process.env.SESSION_SECRET;
+  const secret = process.env.SECRET;
 
   if (!secret) {
-    return res.status(500).json({ error: 'Server misconfigured: missing SESSION_SECRET' });
+    return res.status(500).json({ error: 'Server misconfigured: missing SECRET' });
   }
 
   if (!username || !password) {
