@@ -75,8 +75,13 @@
       });
 
       if (res.ok) {
+        const data = await res.json().catch(() => ({}));
         // Store username so save-transcript.js can tag transcripts correctly
         localStorage.setItem('currentUser', username);
+        // Store expiry so session-timer.js can show a countdown before it runs out
+        if (data.expiresAt) {
+          localStorage.setItem('voxera_session_expires', String(data.expiresAt));
+        }
         window.location.href = '/voice_chat.html';
       } else {
         const data = await res.json().catch(() => ({}));

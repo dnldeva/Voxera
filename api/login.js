@@ -31,16 +31,18 @@ module.exports = async (req, res) => {
     return res.status(401).json({ error: 'Invalid username or password' });
   }
 
-  // Session length: 90 minutes
-  const expiry = Date.now() + 2 * 60 * 1000; // 90 minutes in milliseconds
+  // TEST: Session length: 5 minutes (temporary, for countdown-timer testing)
+  const expiry = Date.now() + 5 * 60 * 1000; // 5 minutes in milliseconds
   const payload = `${username}.${expiry}`;
   const signature = sign(payload, secret);
   const token = `${payload}.${signature}`;
 
   res.setHeader(
     'Set-Cookie',
-    `voxera_session=${token}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=120` // 90 minutes in seconds
+    `voxera_session=${token}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=300` // 5 minutes in seconds
   );
 
-  return res.status(200).json({ success: true, username });
+  // expiresAt is safe to expose (just a timestamp, not the secret) — lets the
+  // client show a countdown without being able to read or forge the HttpOnly cookie itself.
+  return res.status(200).json({ success: true, username, expiresAt: expiry });
 };
