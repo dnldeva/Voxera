@@ -31,18 +31,15 @@ module.exports = async (req, res) => {
     return res.status(401).json({ error: 'Invalid username or password' });
   }
 
-  // NOTE: per-user expiresAt in users.json is NOT enforced here, to keep this simple.
-  // Session below always lasts 24 hours from login regardless of that field.
-  // If you want accounts to stop working after a certain date, say so and I'll wire it in.
-
-  const expiry = Date.now() + 24 * 60 * 60 * 1000; // 24-hour session
+  // Session length: 90 minutes
+  const expiry = Date.now() + 90 * 60 * 1000; // 90 minutes in milliseconds
   const payload = `${username}.${expiry}`;
   const signature = sign(payload, secret);
   const token = `${payload}.${signature}`;
 
   res.setHeader(
     'Set-Cookie',
-    `voxera_session=${token}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=86400`
+    `voxera_session=${token}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=5400` // 90 minutes in seconds
   );
 
   return res.status(200).json({ success: true, username });
