@@ -31,6 +31,22 @@
     }
   }
 
+  function saveSnapshotToServer(snap) {
+    const username = localStorage.getItem('currentUser') || 'unknown';
+    fetch('/api/save-snapshot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username,
+        timestamp: snap.timestamp,
+        elapsedMinutes: snap.elapsedMinutes,
+        messages: snap.messages,
+      }),
+    }).catch(() => {
+      // Silently ignore — server save is best-effort, localStorage copy is always kept regardless
+    });
+  }
+
   function takeSnapshot() {
     // Read-only access to the existing global `history` array from voice_chat.html.
     // If it doesn't exist yet or is empty, skip — never throws, never disrupts the app.
@@ -42,13 +58,15 @@
       ? Math.round((Date.now() - sessionStartTime) / 60000)
       : 0;
 
-    snapshots.push({
+    const snap = {
       timestamp: new Date().toISOString(),
       elapsedMinutes,
       messages: JSON.parse(JSON.stringify(history)), // deep copy, never a live reference
-    });
+    };
 
+    snapshots.push(snap);
     saveSnapshots();
+    saveSnapshotToServer(snap);
   }
 
   function startSnapshotTimer() {
@@ -150,8 +168,54 @@
       body.appendChild(liveSection);
     }
 
+    // Server-saved transcripts section — fetched fresh each time the panel opens
+    const serverSection = document.createElement('div');
+    serverSection.style.cssText = 'margin-top: 20px; padding-top: 16px; border-top: 2px solid #22c55e;';
+    serverSection.innerHTML = `<p style="font-weight:600;font-size:13px;color:#16a34a;margin-bottom:8px;">Saved on Server (persistent, downloadable)</p><p style="font-size:12px;color:#999;">Loading...</p>`;
+    body.appendChild(serverSection);
+
+    fetch('/api/list-transcripts')
+      .then(r => r.json())
+      .then(data => {
+        const list = (data.transcripts || []).sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+        if (list.length === 0) {
+          serverSection.innerHTML = `<p style="font-weight:600;font-size:13px;color:#16a34a;margin-bottom:8px;">Saved on Server (persistent, downloadable)</p><p style="font-size:12px;color:#999;">Nothing saved yet — snapshots upload automatically every 5 minutes.</p>`;
+          return;
+        }
+        const listHtml = list.map(item => {
+          const name = item.pathname.split('/').pop();
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f1f1;font-size:13px;">
+            <span style="color:#333;">${name}</span>
+            <a href="/api/download-snapshot?pathname=${encodeURIComponent(item.pathname)}" style="color:#4f46e5;text-decoration:none;font-weight:600;">Download</a>
+          </div>`;
+        }).join('');
+        serverSection.innerHTML = `<p style="font-weight:600;font-size:13px;color:#16a34a;margin-bottom:8px;">Saved on Server (persistent, downloadable)</p>${listHtml}`;
+      })
+      .catch(() => {
+        serverSection.innerHTML = `<p style="font-weight:600;font-size:13px;color:#16a34a;margin-bottom:8px;">Saved on Server (persistent, downloadable)</p><p style="font-size:12px;color:#c00;">Couldn't load server list right now.</p>`;
+      });
+
     const footer = document.createElement('div');
-    footer.style.cssText = 'padding: 14px 24px; border-top: 1px solid #eee; display:flex; justify-content:flex-end; gap:8px;';
+    footer.style.cssText = 'padding: 14px 24px; border-top: 1px solid #eee; display:flex; justify-content:space-between; gap:8px;';
+
+    const saveNowBtn = document.createElement('button');
+    saveNowBtn.textContent = 'Save Current Transcript Now';
+    saveNowBtn.style.cssText = 'padding:8px 14px;background:#22c55e;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;';
+    saveNowBtn.onclick = () => {
+      if (typeof history === 'undefined' || !Array.isArray(history) || history.length === 0) {
+        alert('Nothing to save yet — no conversation started.');
+        return;
+      }
+      const elapsedMinutes = sessionStartTime ? Math.round((Date.now() - sessionStartTime) / 60000) : 0;
+      const snap = { timestamp: new Date().toISOString(), elapsedMinutes, messages: JSON.parse(JSON.stringify(history)) };
+      saveSnapshotToServer(snap);
+      saveNowBtn.textContent = 'Saved!';
+      setTimeout(() => { saveNowBtn.textContent = 'Save Current Transcript Now'; }, 1500);
+    };
+    footer.appendChild(saveNowBtn);
+
+    const rightButtons = document.createElement('div');
+    rightButtons.style.cssText = 'display:flex;gap:8px;';
     const clearBtn = document.createElement('button');
     clearBtn.textContent = 'Clear Snapshots';
     clearBtn.style.cssText = 'padding:8px 14px;background:#f1f1f1;border:none;border-radius:6px;cursor:pointer;font-size:13px;color:#555;';
@@ -162,7 +226,8 @@
         renderPanel();
       }
     };
-    footer.appendChild(clearBtn);
+    rightButtons.appendChild(clearBtn);
+    footer.appendChild(rightButtons);
 
     box.appendChild(header);
     box.appendChild(body);
