@@ -15,6 +15,7 @@ export default async function handler(req, res) {
 
     const items = blobs.map(b => ({
       pathname: b.pathname,
+      url: b.url,
       size: b.size,
       uploadedAt: b.uploadedAt,
     }));

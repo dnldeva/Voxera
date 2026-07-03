@@ -186,7 +186,7 @@
           const name = item.pathname.split('/').pop();
           return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f1f1;font-size:13px;">
             <span style="color:#333;">${name}</span>
-            <a href="/api/download-snapshot?pathname=${encodeURIComponent(item.pathname)}" style="color:#4f46e5;text-decoration:none;font-weight:600;">Download</a>
+            <a href="/api/download-snapshot?url=${encodeURIComponent(item.url)}&pathname=${encodeURIComponent(item.pathname)}" style="color:#4f46e5;text-decoration:none;font-weight:600;">Download</a>
           </div>`;
         }).join('');
         serverSection.innerHTML = `<p style="font-weight:600;font-size:13px;color:#16a34a;margin-bottom:8px;">Saved on Server (persistent, downloadable)</p>${listHtml}`;
