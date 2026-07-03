@@ -55,10 +55,12 @@
   .bottom { padding: 14px 20px 18px; border-top: 1px solid #eee; background: #fafafa; }
   .controls-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
   .right-controls { display: flex; align-items: center; gap: 14px; }
-  .go-btn { width: 74px; height: 74px; border-radius: 50%; border: none; background: #1a1a2e; color: #EF9F27; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 12px rgba(26,26,46,0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; letter-spacing: 1px; }
+  .go-btn-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .go-btn { width: 74px; height: 74px; border-radius: 50%; border: none; background: #1a1a2e; color: #EF9F27; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 12px rgba(26,26,46,0.3); display: flex; align-items: center; justify-content: center; }
+  .go-btn-wrap span { font-size: 11px; color: #1a1a2e; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
   .go-btn:hover { background: #2a2a4e; transform: scale(1.05); }
   .go-btn:active { transform: scale(0.97); }
-  .go-btn svg { width: 20px; height: 20px; fill: #EF9F27; }
+  .go-btn svg { width: 26px; height: 26px; fill: #EF9F27; }
   .interviewer-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; }
   .interviewer-btn button { width: 74px; height: 74px; border-radius: 50%; border: 2.5px solid #1a1a2e; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 3px 12px rgba(26,26,46,0.12); }
   .interviewer-btn button svg { width: 27px; height: 27px; fill: #1a1a2e; }
@@ -112,7 +114,7 @@
       <div class="avatar ai-av">D2N</div>
       <div class="bubble">
         <div class="label">Voxera Assistant</div>
-        Welcome To Voxera! <strong>Interviewer</strong>Capture a question, then <strong>GO</strong> for an instant answer.
+        Welcome to Voxera. Press <strong>Record</strong> to capture the interviewer's question, then <strong>GO</strong> for an instant answer.
       </div>
     </div>
   </div>
@@ -126,18 +128,20 @@
       </div>
       <div class="right-controls">
         <div class="interviewer-btn">
-          <button id="interviewer-mic" onclick="toggleMic('interviewer')" title="Capture interviewer question">
+          <button id="interviewer-mic" onclick="toggleMic('interviewer')" title="Record the interviewer's question">
             <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-6 9a6 6 0 0 0 12 0h2a8 8 0 0 1-7 7.93V21h-2v-3.07A8 8 0 0 1 4 10h2z"/></svg>
           </button>
-          <span>Interviewer</span>
+          <span>Record</span>
         </div>
-        <button class="go-btn" id="go-btn" onclick="submitQuestion()">
-          <svg viewBox="0 0 24 24"><path d="M2 12l18-9-5 9 5 9z"/></svg>
-          GO
-        </button>
+        <div class="go-btn-wrap">
+          <button class="go-btn" id="go-btn" onclick="submitQuestion()">
+            <svg viewBox="0 0 24 24"><path d="M22 12L4 3l5 9-5 9z"/></svg>
+          </button>
+          <span>Go</span>
+        </div>
       </div>
     </div>
-    <div class="status" id="status">System ready — press Interviewer to begin</div>
+    <div class="status" id="status">System ready — press Record to begin</div>
     <div class="error" id="error"></div>
   </div>
   <div class="footer">
@@ -286,7 +290,7 @@ Base every answer strictly on the candidate's real resume and the job descriptio
       isListening = true;
       document.getElementById(mode === 'interviewer' ? 'interviewer-mic' : 'candidate-mic').className = 'listening';
       showModeIndicator(mode); setTranscript('', 'recording');
-      setStatus(mode === 'interviewer' ? 'Capturing input — press Interviewer again to stop' : 'Recording your voice — press Respond again to stop');
+      setStatus(mode === 'interviewer' ? 'Capturing input — press Record again to stop' : 'Recording your voice — press Respond again to stop');
     };
     recognition.onresult = (e) => {
       let interim = '', finalBit = '';
@@ -303,7 +307,7 @@ Base every answer strictly on the candidate's real resume and the job descriptio
       if (text) {
         setTranscript(text, mode === 'interviewer' ? 'active' : '');
         if (mode === 'interviewer') { setStatus('Input captured — press GO for Voxera insight'); }
-        else { addMsg('candidate', text); capturedText = ''; setTranscript('', ''); setStatus('Response noted — press Interviewer for next input'); }
+        else { addMsg('candidate', text); capturedText = ''; setTranscript('', ''); setStatus('Response noted — press Record for next input'); }
       } else { setTranscript('', ''); setStatus('No audio detected — please try again'); }
     };
     recognition.onerror = (e) => {
@@ -318,7 +322,7 @@ Base every answer strictly on the candidate's real resume and the job descriptio
   async function submitQuestion() {
     if (isListening) { recognition.stop(); await new Promise(r => setTimeout(r, 500)); }
     const text = capturedText.trim();
-    if (!text) { showError('No input captured yet — press Interviewer first'); return; }
+    if (!text) { showError('No input captured yet — press Record first'); return; }
     if (highlightTimer) { clearInterval(highlightTimer); hideZoomPopup(); }
     addMsg('interviewer', text);
     setTranscript('', ''); capturedText = '';
@@ -337,7 +341,7 @@ Base every answer strictly on the candidate's real resume and the job descriptio
         history.push({ role: 'assistant', content: reply });
         removeTyping();
         const bubble = addMsg('ai', reply);
-        clearError(); setStatus('System ready — press Interviewer to continue');
+        clearError(); setStatus('System ready — press Record to continue');
         if (isHighlightOn()) setTimeout(() => startWordHighlight(bubble, reply), 400);
       }
     } catch(e) { removeTyping(); showError('Connection error — check your network'); history.pop(); }
@@ -349,4 +353,3 @@ Base every answer strictly on the candidate's real resume and the job descriptio
 <script src="session-timer.js"></script>
 </body>
 </html>
-
