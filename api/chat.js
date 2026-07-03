@@ -23,9 +23,18 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // If the client requested a specific model manually (via the UI switcher),
+  // try that one first, then fall back through the rest of the normal chain
+  // if it fails. On "Auto" (no preferredModel sent), behavior is unchanged.
+  const { preferredModel, ...bodyWithoutOverride } = req.body || {};
+  let chain = MODEL_CHAIN;
+  if (preferredModel && MODEL_CHAIN.includes(preferredModel)) {
+    chain = [preferredModel, ...MODEL_CHAIN.filter(m => m !== preferredModel)];
+  }
+
   let lastError = null;
 
-  for (const model of MODEL_CHAIN) {
+  for (const model of chain) {
     try {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
@@ -34,7 +43,7 @@ export default async function handler(req, res) {
           'Authorization': 'Bearer ' + process.env.GROQ_API_KEY,
         },
         // Override whatever model the client sent — this endpoint controls the chain now
-        body: JSON.stringify({ ...req.body, model }),
+        body: JSON.stringify({ ...bodyWithoutOverride, model }),
       });
 
       const data = await response.json();
