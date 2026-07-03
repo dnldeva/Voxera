@@ -32,14 +32,14 @@ module.exports = async (req, res) => {
   }
 
   // Session length: 90 minutes
-  const expiry = Date.now() + 90 * 60 * 1000; // 90 minutes in milliseconds
+  const expiry = Date.now() + 2 * 60 * 1000; // 90 minutes in milliseconds
   const payload = `${username}.${expiry}`;
   const signature = sign(payload, secret);
   const token = `${payload}.${signature}`;
 
   res.setHeader(
     'Set-Cookie',
-    `voxera_session=${token}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=5400` // 90 minutes in seconds
+    `voxera_session=${token}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=120` // 90 minutes in seconds
   );
 
   return res.status(200).json({ success: true, username });
