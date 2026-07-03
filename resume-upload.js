@@ -238,9 +238,12 @@
           try {
             const parsedBody = JSON.parse(args[1].body);
             if (Array.isArray(parsedBody.messages) && parsedBody.messages[0] && parsedBody.messages[0].role === 'system') {
-              let extra = '\n\n--- ADDITIONAL CONTEXT (uploaded by candidate) ---\n';
-              if (resumeText) extra += `\nRESUME:\n${resumeText}\n`;
-              if (jdText) extra += `\nJOB DESCRIPTION:\n${jdText}\n`;
+              let extra = '\n\n--- CANDIDATE UPDATE (uploaded just now) ---\n';
+              extra += 'The candidate has uploaded their ACTUAL, CURRENT resume and/or job description below. ';
+              extra += 'This is more current and authoritative than any example name, company, or background described earlier in these instructions. ';
+              extra += 'From this point forward, answer using ONLY the real details below — ignore any earlier example candidate name or history unless it also appears here.\n';
+              if (resumeText) extra += `\nCANDIDATE'S ACTUAL RESUME:\n${resumeText}\n`;
+              if (jdText) extra += `\nTARGET JOB DESCRIPTION:\n${jdText}\n`;
               parsedBody.messages[0] = {
                 ...parsedBody.messages[0],
                 content: parsedBody.messages[0].content + extra,
