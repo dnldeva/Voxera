@@ -45,7 +45,7 @@
   }
 
   function uploadSnapshot(snap) {
-    fetch('/api/manual-save-snapshot', {
+    fetch('/api/manual-transcripts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
