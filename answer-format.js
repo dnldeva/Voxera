@@ -92,7 +92,24 @@
     bubble.dataset.vxFormatted = '1';
   }
 
+  // Layout fixes (CSS only, core file untouched):
+  // - no sideways scrolling: long words/tables wrap inside the bubble
+  // - taller answer area so most answers fit without scrolling
+  function injectCss() {
+    const st = document.createElement('style');
+    st.id = 'vx-answer-format-css';
+    st.textContent = `
+      #messages { overflow-x: hidden !important; max-height: max(360px, calc(100vh - 430px)) !important; }
+      #messages .msg { min-width: 0; }
+      #messages .bubble { min-width: 0; overflow-wrap: anywhere; word-break: break-word; }
+      #messages .bubble table { table-layout: fixed; width: 100%; }
+      #messages .bubble th, #messages .bubble td { overflow-wrap: anywhere; word-break: break-word; }
+    `;
+    document.head.appendChild(st);
+  }
+
   try {
+    injectCss();
     const box = document.getElementById('messages');
     if (!box) return;
     new MutationObserver(muts => {

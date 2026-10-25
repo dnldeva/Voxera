@@ -3,6 +3,9 @@
 //   Down arrow  = start / stop recording the interviewer's question
 //   Right arrow = GO (get the answer). Works even while still recording,
 //                 because submitQuestion() stops the mic first.
+//   Up arrow    = scroll the answers UP
+//   Left arrow  = scroll the answers DOWN
+//   Page Up / Page Down = same scrolling (bigger laptops/keyboards)
 //
 // It only CALLS the existing global functions toggleMic() and submitQuestion()
 // from voice_chat.html. No core code is changed.
@@ -39,7 +42,18 @@
                 document.getElementById('voxera-endur-panel'));
     }
 
+    function scrollAnswers(dir) {
+      const box = document.getElementById('messages');
+      if (!box) return;
+      box.scrollBy({ top: dir * Math.round(box.clientHeight * 0.7), behavior: 'smooth' });
+    }
+
     document.addEventListener('keydown', function (e) {
+      // scrolling keys may be held down for continuous scrolling
+      if (!(e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) && !isTypingInField(document.activeElement) && !panelOpen()) {
+        if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); scrollAnswers(-1); return; }
+        if (e.key === 'ArrowLeft' || e.key === 'PageDown') { e.preventDefault(); scrollAnswers(1); return; }
+      }
       if (e.repeat || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
       if (isTypingInField(document.activeElement) || panelOpen()) return;
 
@@ -55,7 +69,7 @@
     // Small hint so you remember the keys
     const hint = document.createElement('div');
     hint.id = 'voxera-shortcut-hint';
-    hint.textContent = '↓ Record / Stop   ·   → Go';
+    hint.textContent = '↓ Record/Stop · → Go · ↑ Scroll up · ← Scroll down';
     hint.style.cssText = `
       position: fixed; bottom: 20px; right: 20px; z-index: 9995;
       background: rgba(26,26,46,0.85); color: #EF9F27; padding: 6px 12px;
